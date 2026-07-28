@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "sync:runtime": "node scripts/sync-runtime-pack.mjs",
     "build": "node scripts/build.mjs",
     "verify": "node scripts/verify.mjs",
     "test": "npm run build && npm run verify"
@@ -19,4 +20,3 @@
   },
   "license": "MIT"
 }
-
