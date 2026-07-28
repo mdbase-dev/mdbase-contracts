@@ -60,6 +60,11 @@ for (const packFile of packFiles) {
     artifactDigests.set(resource.source, resourceDigest);
     await mkdir(dirname(artifactPath), { recursive: true });
     await writeFile(artifactPath, document);
+    if (resource.kind === "schema") {
+      const schemaPath = join(dist, resource.source);
+      await mkdir(dirname(schemaPath), { recursive: true });
+      await writeFile(schemaPath, document);
+    }
 
     if (resource.kind === "contract") {
       registerContract(resource.source, document, resourceDigest);
@@ -210,4 +215,3 @@ function json(value) {
 function fail(message) {
   throw new Error(message);
 }
-

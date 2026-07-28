@@ -39,6 +39,12 @@ for (const pack of catalog.packs) {
     if (artifact !== resource.document) {
       fail(`Published artifact ${definition.source} differs from its embedded pack resource.`);
     }
+    if (definition.kind === "schema") {
+      const schema = await readFile(join(dist, definition.source), "utf8");
+      if (schema !== resource.document) {
+        fail(`Published schema ${definition.source} differs from its embedded pack resource.`);
+      }
+    }
   }
 
   const collectionRoot = await mkdtemp(join(tmpdir(), "mdbase-contract-catalog-"));
@@ -121,4 +127,3 @@ function json(document) {
 function fail(message) {
   throw new Error(message);
 }
-
