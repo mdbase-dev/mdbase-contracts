@@ -4,6 +4,7 @@ version: 2.0.2
 name: JSContact 2.0 starter
 description: The mdbase JSContact Card core contract and a fully expanded, editable Markdown implementation.
 featured: true
+catalog: false
 expand_local_refs: true
 provides:
   - id: mdbase.jscontact.card

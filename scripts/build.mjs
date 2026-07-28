@@ -37,6 +37,7 @@ for (const packFile of packFiles) {
 
   const resources = [];
   const manifestResources = [];
+  const installedTypes = [];
   for (const resource of definition.resources) {
     assertSafePath(resource.source, "resource source");
     assertSafePath(resource.target, "resource target");
@@ -72,6 +73,11 @@ for (const packFile of packFiles) {
     }
     if (resource.kind === "type" && definition.catalog !== false) {
       validateEditableType(resource.source, document, definition.expand_local_refs === true);
+      const frontmatter = matter(document).data;
+      installedTypes.push({
+        name: frontmatter.name,
+        label: humanizeTypeName(frontmatter.name),
+      });
     }
   }
 
@@ -93,6 +99,7 @@ for (const packFile of packFiles) {
   await writeFile(join(dist, provisionPath), provisionDocument);
 
   if (definition.catalog !== false) {
+    validateCatalogPresentation(definition, installedTypes, relative(root, packFile));
     packs.push({
       id: definition.id,
       version: definition.version,
@@ -102,7 +109,11 @@ for (const packFile of packFiles) {
       provision: `./${provisionPath}`,
       provides: definition.provides,
       resource_count: definition.resources.length,
-      featured: definition.featured,
+      display: definition.display,
+      installation: {
+        ...definition.installation,
+        types: installedTypes,
+      },
     });
   }
 }
@@ -113,10 +124,12 @@ const catalog = {
   packs: packs.sort(compareIdentity),
 };
 await writeFile(join(dist, "catalog.json"), json(catalog));
-await cp(
-  join(root, "schemas", "catalog.v1.schema.json"),
-  join(dist, "schemas", "catalog.v1.schema.json"),
-);
+for (const version of [1, 2]) {
+  await cp(
+    join(root, "schemas", `catalog.v${version}.schema.json`),
+    join(dist, "schemas", `catalog.v${version}.schema.json`),
+  );
+}
 
 console.log(
   `Built ${catalog.contracts.length} contract and ${catalog.packs.length} pack into ${relative(root, dist)}.`,
@@ -187,7 +200,6 @@ function validatePackDefinition(value, label) {
       fail(`${label} is missing ${key}.`);
     }
   }
-  if (typeof value.featured !== "boolean") fail(`${label} must declare featured.`);
   if (value.catalog !== undefined && typeof value.catalog !== "boolean") {
     fail(`${label} catalog must be a boolean.`);
   }
@@ -213,6 +225,73 @@ function validatePackDefinition(value, label) {
     }
     if (!targets.add(resource.target)) fail(`${label} contains duplicate target ${resource.target}.`);
   }
+}
+
+function validateCatalogPresentation(definition, installedTypes, label) {
+  const display = definition.display;
+  if (!display || typeof display !== "object" || Array.isArray(display)) {
+    fail(`${label} must declare display metadata.`);
+  }
+  for (const key of ["name", "summary", "category", "audience", "icon"]) {
+    if (typeof display[key] !== "string" || display[key].length === 0) {
+      fail(`${label} display is missing ${key}.`);
+    }
+  }
+  if (!["people", "work", "research", "calendar", "infrastructure", "other"].includes(
+    display.category,
+  )) {
+    fail(`${label} display.category is invalid.`);
+  }
+  if (!["general", "developer", "infrastructure"].includes(display.audience)) {
+    fail(`${label} display.audience is invalid.`);
+  }
+  if (
+    display.badges !== undefined
+    && (
+      !Array.isArray(display.badges)
+      || display.badges.some((badge) => typeof badge !== "string" || badge.length === 0)
+    )
+  ) {
+    fail(`${label} display.badges must contain non-empty strings.`);
+  }
+
+  const installation = definition.installation;
+  if (!installation || typeof installation !== "object" || Array.isArray(installation)) {
+    fail(`${label} must declare installation metadata.`);
+  }
+  if (!["default", "advanced", "hidden"].includes(installation.visibility)) {
+    fail(`${label} installation.visibility is invalid.`);
+  }
+  if (!["user", "optional", "integration-managed"].includes(installation.recommendation)) {
+    fail(`${label} installation.recommendation is invalid.`);
+  }
+  if (
+    installation.caution !== undefined
+    && (typeof installation.caution !== "string" || installation.caution.length === 0)
+  ) {
+    fail(`${label} installation.caution must be a non-empty string.`);
+  }
+  if (
+    installation.primary_type !== null
+    && typeof installation.primary_type !== "string"
+  ) {
+    fail(`${label} installation.primary_type must be a type name or null.`);
+  }
+  if (
+    typeof installation.primary_type === "string"
+    && !installedTypes.some(({ name }) => name === installation.primary_type)
+  ) {
+    fail(
+      `${label} installation.primary_type ${installation.primary_type} is not installed by the pack.`,
+    );
+  }
+}
+
+function humanizeTypeName(name) {
+  const parts = name.split(/[\s_-]+/u).filter(Boolean);
+  return parts
+    .map((part, index) => index === 0 ? `${part[0].toUpperCase()}${part.slice(1)}` : part)
+    .join(" ");
 }
 
 async function walk(directory) {

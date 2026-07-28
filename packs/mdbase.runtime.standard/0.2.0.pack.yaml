@@ -3,7 +3,19 @@ id: mdbase.runtime.standard
 version: 0.2.0
 name: mdbase durable runtime standard library
 description: Runtime record implementations and inspectable built-in event/action contracts.
-featured: true
+display:
+  name: Runtime standard library
+  summary: Internal records and contracts for durable workflows, runs, timers, and diagnostics.
+  category: infrastructure
+  audience: infrastructure
+  icon: terminal-window
+  badges:
+    - Runtime 0.2
+installation:
+  visibility: advanced
+  recommendation: integration-managed
+  primary_type: null
+  caution: Most collections do not need this pack. Install it only when a runtime integration asks you to.
 provides:
   - id: mdbase.runtime.action-attempt
     version: 1.0.0

@@ -71,7 +71,20 @@ const definition = {
   version: manifest.version,
   name: manifest.name,
   description: manifest.description,
-  featured: true,
+  display: {
+    name: "Runtime standard library",
+    summary: "Internal records and contracts for durable workflows, runs, timers, and diagnostics.",
+    category: "infrastructure",
+    audience: "infrastructure",
+    icon: "terminal-window",
+    badges: ["Runtime 0.2"]
+  },
+  installation: {
+    visibility: "advanced",
+    recommendation: "integration-managed",
+    primary_type: null,
+    caution: "Most collections do not need this pack. Install it only when a runtime integration asks you to."
+  },
   // `provides` means the installed types implement these record contracts.
   // Event/action artifacts remain available for admission, while live
   // declarations say which sources/providers actually supply them.

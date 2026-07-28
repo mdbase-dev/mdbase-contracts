@@ -1,0 +1,31 @@
+kind: mdbase.catalog-pack
+id: mdbase.jscontact
+version: 2.0.3
+name: Contact type pack
+description: The mdbase JSContact Card core contract and a fully expanded, editable Contact type.
+display:
+  name: Contact
+  summary: Store people and organisations with names, email addresses, phone numbers, and notes.
+  category: people
+  audience: general
+  icon: address-book
+  badges:
+    - JSContact 2.0
+installation:
+  visibility: default
+  recommendation: user
+  primary_type: contact
+expand_local_refs: true
+provides:
+  - id: mdbase.jscontact.card
+    version: 2.0.0
+resources:
+  - kind: schema
+    source: schemas/mdbase.jscontact.card/2.0.0.schema.json
+    target: schemas/mdbase.jscontact.card/2.0.0.schema.json
+  - kind: contract
+    source: contracts/mdbase.jscontact.card/2.0.0.md
+    target: _contracts/mdbase.jscontact.card/2.0.0.md
+  - kind: type
+    source: types/contact/1.md
+    target: _types/contact.md

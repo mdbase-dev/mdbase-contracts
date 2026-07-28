@@ -9,7 +9,9 @@ import addFormats from "ajv-formats";
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const dist = join(root, "dist");
 const catalog = json(await readFile(join(dist, "catalog.json"), "utf8"));
-const catalogSchema = json(await readFile(join(root, "schemas", "catalog.v1.schema.json"), "utf8"));
+const catalogSchema = json(
+  await readFile(join(root, `schemas/catalog.v${catalog.catalog_version}.schema.json`), "utf8"),
+);
 const ajv = new Ajv2020({ allErrors: true, strict: true });
 addFormats(ajv);
 
