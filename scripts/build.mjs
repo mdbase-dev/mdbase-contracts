@@ -11,6 +11,7 @@ import { dirname, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import matter from "gray-matter";
 import { parse } from "yaml";
+import { expandLocalReferences } from "./schema-expansion.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const dist = join(root, "dist");
@@ -70,7 +71,7 @@ for (const packFile of packFiles) {
       registerContract(resource.source, document, resourceDigest);
     }
     if (resource.kind === "type" && definition.catalog !== false) {
-      validateEditableType(resource.source, document);
+      validateEditableType(resource.source, document, definition.expand_local_refs === true);
     }
   }
 
@@ -149,7 +150,7 @@ function registerContract(source, document, resourceDigest) {
   contracts.set(identity, entry);
 }
 
-function validateEditableType(source, document) {
+function validateEditableType(source, document, requireExpandedReferences) {
   const frontmatter = matter(document).data;
   if (frontmatter.kind !== "mdbase.type") {
     fail(`Type resource ${source} is not an mdbase.type document.`);
@@ -166,6 +167,15 @@ function validateEditableType(source, document) {
   if (frontmatter.schema.ref !== undefined) {
     fail(`Catalog type resource ${source} must not inherit a referenced schema.`);
   }
+  if (requireExpandedReferences) {
+    const expansion = expandLocalReferences(frontmatter.schema.value);
+    if (expansion.expandedCount > 0) {
+      fail(
+        `Catalog type resource ${source} contains ${expansion.expandedCount} expandable local `
+        + `${expansion.expandedCount === 1 ? "reference" : "references"}; run npm run expand:type.`,
+      );
+    }
+  }
 }
 
 function validatePackDefinition(value, label) {
@@ -180,6 +190,12 @@ function validatePackDefinition(value, label) {
   if (typeof value.featured !== "boolean") fail(`${label} must declare featured.`);
   if (value.catalog !== undefined && typeof value.catalog !== "boolean") {
     fail(`${label} catalog must be a boolean.`);
+  }
+  if (
+    value.expand_local_refs !== undefined
+    && typeof value.expand_local_refs !== "boolean"
+  ) {
+    fail(`${label} expand_local_refs must be a boolean.`);
   }
   if (!Array.isArray(value.provides) || value.provides.length === 0) {
     fail(`${label} must provide at least one contract.`);

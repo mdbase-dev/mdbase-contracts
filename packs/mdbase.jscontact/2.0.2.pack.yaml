@@ -1,10 +1,10 @@
 kind: mdbase.catalog-pack
 id: mdbase.jscontact
-version: 2.0.1
+version: 2.0.2
 name: JSContact 2.0 starter
-description: The mdbase JSContact Card core contract and an editable Markdown implementation.
+description: The mdbase JSContact Card core contract and a fully expanded, editable Markdown implementation.
 featured: true
-catalog: false
+expand_local_refs: true
 provides:
   - id: mdbase.jscontact.card
     version: 2.0.0
@@ -16,5 +16,5 @@ resources:
     source: contracts/mdbase.jscontact.card/2.0.0.md
     target: _contracts/mdbase.jscontact.card/2.0.0.md
   - kind: type
-    source: types/jscontact-card/2.md
+    source: types/jscontact-card/3.md
     target: _types/jscontact-card.md

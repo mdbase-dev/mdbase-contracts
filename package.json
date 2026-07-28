@@ -6,8 +6,9 @@
   "scripts": {
     "sync:runtime": "node scripts/sync-runtime-pack.mjs",
     "build": "node scripts/build.mjs",
+    "expand:type": "node scripts/expand-type.mjs",
     "verify": "node scripts/verify.mjs",
-    "test": "npm run build && npm run verify"
+    "test": "node --test scripts/schema-expansion.test.mjs && npm run build && npm run verify"
   },
   "dependencies": {
     "ajv": "^8.20.0",
