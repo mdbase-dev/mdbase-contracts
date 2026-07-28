@@ -9,6 +9,11 @@ instead of inheriting that boundary. Once installed, the type belongs to the
 collection: users can edit its fields and update the explicit contract mapping
 without changing the published contract.
 
+The featured `mdbase.runtime.standard` pack supplies the durable runtime 0.2
+standard library: ten ordinary record contracts and canonical implementing
+types, plus inspectable timer-event and cancellation-action artifacts.
+Installing it is passive and grants no execution authority.
+
 This repository is the canonical source. Its deterministic `dist/` output is
 published at `https://mdbase.dev/contracts/`. A catalog entry is only a
 discovery aid: every installable pack contains an exact manifest, embedded
@@ -23,6 +28,12 @@ types/<name>/<version>.md          default implementing types
 schemas/<id>/<version>.json        referenced JSON Schemas
 packs/<id>/<version>.pack.yaml     readable pack definitions
 dist/                              deterministic publication artifact
+```
+
+The runtime pack is generated in `mdbase-spec` and imported exactly with:
+
+```sh
+MDBASE_SPEC_DIR=../mdbase-spec npm run sync:runtime
 ```
 
 ## Build and verify

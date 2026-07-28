@@ -1,0 +1,133 @@
+kind: mdbase.catalog-pack
+id: mdbase.runtime.standard
+version: 0.2.0
+name: mdbase durable runtime standard library
+description: Runtime record implementations and inspectable built-in event/action contracts.
+featured: true
+provides:
+  - id: mdbase.runtime.workflow
+    version: 1.0.0
+  - id: mdbase.runtime.policy
+    version: 1.0.0
+  - id: mdbase.runtime.provider-registration
+    version: 1.0.0
+  - id: mdbase.runtime.capability-grant
+    version: 1.0.0
+  - id: mdbase.runtime.run
+    version: 1.0.0
+  - id: mdbase.runtime.action-attempt
+    version: 1.0.0
+  - id: mdbase.runtime.checkpoint
+    version: 1.0.0
+  - id: mdbase.runtime.timer
+    version: 1.0.0
+  - id: mdbase.runtime.diagnostic
+    version: 1.0.0
+  - id: mdbase.runtime.dead-letter
+    version: 1.0.0
+resources:
+  - kind: schema
+    source: schemas/mdbase.runtime.workflow/1.0.0.schema.json
+    target: schemas/mdbase.runtime.workflow/1.0.0.schema.json
+  - kind: contract
+    source: contracts/mdbase.runtime.workflow/1.0.0.md
+    target: _contracts/mdbase.runtime.workflow/1.0.0.md
+  - kind: type
+    source: types/mdbase-runtime/workflow.md
+    target: _types/workflow.md
+  - kind: schema
+    source: schemas/mdbase.runtime.policy/1.0.0.schema.json
+    target: schemas/mdbase.runtime.policy/1.0.0.schema.json
+  - kind: contract
+    source: contracts/mdbase.runtime.policy/1.0.0.md
+    target: _contracts/mdbase.runtime.policy/1.0.0.md
+  - kind: type
+    source: types/mdbase-runtime/policy.md
+    target: _types/policy.md
+  - kind: schema
+    source: schemas/mdbase.runtime.provider-registration/1.0.0.schema.json
+    target: schemas/mdbase.runtime.provider-registration/1.0.0.schema.json
+  - kind: contract
+    source: contracts/mdbase.runtime.provider-registration/1.0.0.md
+    target: _contracts/mdbase.runtime.provider-registration/1.0.0.md
+  - kind: type
+    source: types/mdbase-runtime/provider-registration.md
+    target: _types/provider-registration.md
+  - kind: schema
+    source: schemas/mdbase.runtime.capability-grant/1.0.0.schema.json
+    target: schemas/mdbase.runtime.capability-grant/1.0.0.schema.json
+  - kind: contract
+    source: contracts/mdbase.runtime.capability-grant/1.0.0.md
+    target: _contracts/mdbase.runtime.capability-grant/1.0.0.md
+  - kind: type
+    source: types/mdbase-runtime/capability-grant.md
+    target: _types/capability-grant.md
+  - kind: schema
+    source: schemas/mdbase.runtime.run/1.0.0.schema.json
+    target: schemas/mdbase.runtime.run/1.0.0.schema.json
+  - kind: contract
+    source: contracts/mdbase.runtime.run/1.0.0.md
+    target: _contracts/mdbase.runtime.run/1.0.0.md
+  - kind: type
+    source: types/mdbase-runtime/run.md
+    target: _types/run.md
+  - kind: schema
+    source: schemas/mdbase.runtime.action-attempt/1.0.0.schema.json
+    target: schemas/mdbase.runtime.action-attempt/1.0.0.schema.json
+  - kind: contract
+    source: contracts/mdbase.runtime.action-attempt/1.0.0.md
+    target: _contracts/mdbase.runtime.action-attempt/1.0.0.md
+  - kind: type
+    source: types/mdbase-runtime/action-attempt.md
+    target: _types/action-attempt.md
+  - kind: schema
+    source: schemas/mdbase.runtime.checkpoint/1.0.0.schema.json
+    target: schemas/mdbase.runtime.checkpoint/1.0.0.schema.json
+  - kind: contract
+    source: contracts/mdbase.runtime.checkpoint/1.0.0.md
+    target: _contracts/mdbase.runtime.checkpoint/1.0.0.md
+  - kind: type
+    source: types/mdbase-runtime/checkpoint.md
+    target: _types/checkpoint.md
+  - kind: schema
+    source: schemas/mdbase.runtime.timer/1.0.0.schema.json
+    target: schemas/mdbase.runtime.timer/1.0.0.schema.json
+  - kind: contract
+    source: contracts/mdbase.runtime.timer/1.0.0.md
+    target: _contracts/mdbase.runtime.timer/1.0.0.md
+  - kind: type
+    source: types/mdbase-runtime/timer.md
+    target: _types/timer.md
+  - kind: schema
+    source: schemas/mdbase.runtime.diagnostic/1.0.0.schema.json
+    target: schemas/mdbase.runtime.diagnostic/1.0.0.schema.json
+  - kind: contract
+    source: contracts/mdbase.runtime.diagnostic/1.0.0.md
+    target: _contracts/mdbase.runtime.diagnostic/1.0.0.md
+  - kind: type
+    source: types/mdbase-runtime/diagnostic.md
+    target: _types/diagnostic.md
+  - kind: schema
+    source: schemas/mdbase.runtime.dead-letter/1.0.0.schema.json
+    target: schemas/mdbase.runtime.dead-letter/1.0.0.schema.json
+  - kind: contract
+    source: contracts/mdbase.runtime.dead-letter/1.0.0.md
+    target: _contracts/mdbase.runtime.dead-letter/1.0.0.md
+  - kind: type
+    source: types/mdbase-runtime/dead-letter.md
+    target: _types/dead-letter.md
+  - kind: schema
+    source: schemas/mdbase.runtime.timer.fired/1.0.0.schema.json
+    target: schemas/mdbase.runtime.timer.fired/1.0.0.schema.json
+  - kind: contract
+    source: contracts/mdbase.runtime.timer.fired/1.0.0.md
+    target: _contracts/mdbase.runtime.timer.fired/1.0.0.md
+  - kind: schema
+    source: schemas/mdbase.runtime.run.cancel/1.0.0.output.schema.json
+    target: schemas/mdbase.runtime.run.cancel/1.0.0.output.schema.json
+  - kind: schema
+    source: schemas/mdbase.runtime.run.cancel/1.0.0.schema.json
+    target: schemas/mdbase.runtime.run.cancel/1.0.0.schema.json
+  - kind: contract
+    source: contracts/mdbase.runtime.run.cancel/1.0.0.md
+    target: _contracts/mdbase.runtime.run.cancel/1.0.0.md
