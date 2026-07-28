@@ -69,6 +69,9 @@ for (const packFile of packFiles) {
     if (resource.kind === "contract") {
       registerContract(resource.source, document, resourceDigest);
     }
+    if (resource.kind === "type" && definition.catalog !== false) {
+      validateEditableType(resource.source, document);
+    }
   }
 
   const provision = {
@@ -88,17 +91,19 @@ for (const packFile of packFiles) {
   await mkdir(dirname(join(dist, provisionPath)), { recursive: true });
   await writeFile(join(dist, provisionPath), provisionDocument);
 
-  packs.push({
-    id: definition.id,
-    version: definition.version,
-    name: definition.name,
-    description: definition.description,
-    digest: digest(provisionDocument),
-    provision: `./${provisionPath}`,
-    provides: definition.provides,
-    resource_count: definition.resources.length,
-    featured: definition.featured,
-  });
+  if (definition.catalog !== false) {
+    packs.push({
+      id: definition.id,
+      version: definition.version,
+      name: definition.name,
+      description: definition.description,
+      digest: digest(provisionDocument),
+      provision: `./${provisionPath}`,
+      provides: definition.provides,
+      resource_count: definition.resources.length,
+      featured: definition.featured,
+    });
+  }
 }
 
 const catalog = {
@@ -144,6 +149,25 @@ function registerContract(source, document, resourceDigest) {
   contracts.set(identity, entry);
 }
 
+function validateEditableType(source, document) {
+  const frontmatter = matter(document).data;
+  if (frontmatter.kind !== "mdbase.type") {
+    fail(`Type resource ${source} is not an mdbase.type document.`);
+  }
+  if (
+    !frontmatter.schema
+    || typeof frontmatter.schema !== "object"
+    || !frontmatter.schema.value
+    || typeof frontmatter.schema.value !== "object"
+    || Array.isArray(frontmatter.schema.value)
+  ) {
+    fail(`Catalog type resource ${source} must contain an editable schema.value snapshot.`);
+  }
+  if (frontmatter.schema.ref !== undefined) {
+    fail(`Catalog type resource ${source} must not inherit a referenced schema.`);
+  }
+}
+
 function validatePackDefinition(value, label) {
   if (!value || typeof value !== "object" || value.kind !== "mdbase.catalog-pack") {
     fail(`${label} must be an mdbase.catalog-pack object.`);
@@ -154,6 +178,9 @@ function validatePackDefinition(value, label) {
     }
   }
   if (typeof value.featured !== "boolean") fail(`${label} must declare featured.`);
+  if (value.catalog !== undefined && typeof value.catalog !== "boolean") {
+    fail(`${label} catalog must be a boolean.`);
+  }
   if (!Array.isArray(value.provides) || value.provides.length === 0) {
     fail(`${label} must provide at least one contract.`);
   }

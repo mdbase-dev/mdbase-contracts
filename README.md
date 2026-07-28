@@ -3,6 +3,12 @@
 First-party, versioned data contracts and transactional type packs for mdbase
 collections.
 
+Published contract schemas are immutable interoperability boundaries. A
+catalog-listed starter type contains an inline snapshot of its starting schema
+instead of inheriting that boundary. Once installed, the type belongs to the
+collection: users can edit its fields and update the explicit contract mapping
+without changing the published contract.
+
 This repository is the canonical source. Its deterministic `dist/` output is
 published at `https://mdbase.dev/contracts/`. A catalog entry is only a
 discovery aid: every installable pack contains an exact manifest, embedded
@@ -48,4 +54,3 @@ A standards-oriented contract must identify its normative references and
 state its profile scope. An mdbase contract is not presented as an official
 schema from the referenced standards body unless that body actually publishes
 it as such.
-
