@@ -1,0 +1,9 @@
+catalog_version: 1
+id: dev.mdbase.first-party
+name: mdbase contracts
+description: Reviewed first-party contracts and starter type packs for mdbase collections.
+homepage: https://mdbase.dev/contracts/
+publisher:
+  name: mdbase
+  url: https://mdbase.dev/
+

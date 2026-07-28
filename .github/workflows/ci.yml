@@ -1,0 +1,51 @@
+name: Catalog checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out contracts
+        uses: actions/checkout@v7
+
+      - name: Read pinned implementation identity
+        id: sources
+        run: |
+          echo "repository=$(jq -r '.typescript_implementation.repository' sources.json)" >> "$GITHUB_OUTPUT"
+          echo "ref=$(jq -r '.typescript_implementation.ref' sources.json)" >> "$GITHUB_OUTPUT"
+
+      - name: Check out TypeScript implementation
+        uses: actions/checkout@v7
+        with:
+          repository: ${{ steps.sources.outputs.repository }}
+          ref: ${{ steps.sources.outputs.ref }}
+          path: .sources/mdbase
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install catalog dependencies
+        run: npm ci
+
+      - name: Build TypeScript implementation
+        working-directory: .sources/mdbase
+        run: npm ci && npm run build
+
+      - name: Build and verify catalog
+        run: npm test
+        env:
+          MDBASE_TS_DIR: .sources/mdbase
+
+      - name: Check deterministic publication output
+        run: git diff --exit-code -- dist
+
