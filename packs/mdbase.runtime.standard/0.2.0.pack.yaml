@@ -5,25 +5,25 @@ name: mdbase durable runtime standard library
 description: Runtime record implementations and inspectable built-in event/action contracts.
 featured: true
 provides:
-  - id: mdbase.runtime.workflow
+  - id: mdbase.runtime.action-attempt
+    version: 1.0.0
+  - id: mdbase.runtime.capability-grant
+    version: 1.0.0
+  - id: mdbase.runtime.checkpoint
+    version: 1.0.0
+  - id: mdbase.runtime.dead-letter
+    version: 1.0.0
+  - id: mdbase.runtime.diagnostic
     version: 1.0.0
   - id: mdbase.runtime.policy
     version: 1.0.0
   - id: mdbase.runtime.provider-registration
     version: 1.0.0
-  - id: mdbase.runtime.capability-grant
-    version: 1.0.0
   - id: mdbase.runtime.run
-    version: 1.0.0
-  - id: mdbase.runtime.action-attempt
-    version: 1.0.0
-  - id: mdbase.runtime.checkpoint
     version: 1.0.0
   - id: mdbase.runtime.timer
     version: 1.0.0
-  - id: mdbase.runtime.diagnostic
-    version: 1.0.0
-  - id: mdbase.runtime.dead-letter
+  - id: mdbase.runtime.workflow
     version: 1.0.0
 resources:
   - kind: schema
@@ -116,6 +116,30 @@ resources:
   - kind: type
     source: types/mdbase-runtime/dead-letter.md
     target: _types/dead-letter.md
+  - kind: schema
+    source: schemas/mdbase.record.created/1.0.0.schema.json
+    target: schemas/mdbase.record.created/1.0.0.schema.json
+  - kind: contract
+    source: contracts/mdbase.record.created/1.0.0.md
+    target: _contracts/mdbase.record.created/1.0.0.md
+  - kind: schema
+    source: schemas/mdbase.record.modified/1.0.0.schema.json
+    target: schemas/mdbase.record.modified/1.0.0.schema.json
+  - kind: contract
+    source: contracts/mdbase.record.modified/1.0.0.md
+    target: _contracts/mdbase.record.modified/1.0.0.md
+  - kind: schema
+    source: schemas/mdbase.record.deleted/1.0.0.schema.json
+    target: schemas/mdbase.record.deleted/1.0.0.schema.json
+  - kind: contract
+    source: contracts/mdbase.record.deleted/1.0.0.md
+    target: _contracts/mdbase.record.deleted/1.0.0.md
+  - kind: schema
+    source: schemas/mdbase.record.renamed/1.0.0.schema.json
+    target: schemas/mdbase.record.renamed/1.0.0.schema.json
+  - kind: contract
+    source: contracts/mdbase.record.renamed/1.0.0.md
+    target: _contracts/mdbase.record.renamed/1.0.0.md
   - kind: schema
     source: schemas/mdbase.runtime.timer.fired/1.0.0.schema.json
     target: schemas/mdbase.runtime.timer.fired/1.0.0.schema.json

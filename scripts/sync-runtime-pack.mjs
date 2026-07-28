@@ -27,6 +27,14 @@ if (
 const runtimeContractIds = manifest.resources
   .filter(({ kind }) => kind === "contract")
   .map(({ source }) => source.split("/")[1]);
+const runtimeRecordIds = [];
+for (const resource of manifest.resources.filter(({ kind }) => kind === "contract")) {
+  const document = await readFile(join(sourceRoot, resource.source), "utf8");
+  const frontmatter = parseFrontmatter(document, resource.source).frontmatter;
+  if (frontmatter.contract_type === "record") {
+    runtimeRecordIds.push(frontmatter.id);
+  }
+}
 const runtimeSchemaIds = manifest.resources
   .filter(({ kind }) => kind === "schema")
   .map(({ source }) => source.split("/")[1]);
@@ -45,7 +53,11 @@ for (const resource of manifest.resources) {
   const from = join(sourceRoot, resource.source);
   const to = join(root, source);
   await mkdir(dirname(to), { recursive: true });
-  await cp(from, to);
+  if (resource.kind === "type") {
+    await writeFile(to, await editableTypeSnapshot(from), "utf8");
+  } else {
+    await cp(from, to);
+  }
   resources.push({
     kind: resource.kind,
     source,
@@ -60,18 +72,12 @@ const definition = {
   name: manifest.name,
   description: manifest.description,
   featured: true,
-  provides: [
-    "mdbase.runtime.workflow",
-    "mdbase.runtime.policy",
-    "mdbase.runtime.provider-registration",
-    "mdbase.runtime.capability-grant",
-    "mdbase.runtime.run",
-    "mdbase.runtime.action-attempt",
-    "mdbase.runtime.checkpoint",
-    "mdbase.runtime.timer",
-    "mdbase.runtime.diagnostic",
-    "mdbase.runtime.dead-letter"
-  ].map((id) => ({ id, version: "1.0.0" })),
+  // `provides` means the installed types implement these record contracts.
+  // Event/action artifacts remain available for admission, while live
+  // declarations say which sources/providers actually supply them.
+  provides: [...new Set(runtimeRecordIds)]
+    .sort()
+    .map((id) => ({ id, version: "1.0.0" })),
   resources
 };
 const packPath = join(root, "packs/mdbase.runtime.standard/0.2.0.pack.yaml");
@@ -79,6 +85,31 @@ await mkdir(dirname(packPath), { recursive: true });
 await writeFile(packPath, stringify(definition, { lineWidth: 0 }), "utf8");
 
 console.log(`Synced ${resources.length} runtime resources from ${sourceRoot}.`);
+
+async function editableTypeSnapshot(path) {
+  const document = await readFile(path, "utf8");
+  const { frontmatter, body } = parseFrontmatter(document, path);
+  const reference = frontmatter?.schema?.ref;
+  if (typeof reference !== "string") {
+    throw new Error(`Runtime type ${path} has no schema.ref to materialize.`);
+  }
+  const value = JSON.parse(
+    await readFile(resolve(dirname(path), reference), "utf8")
+  );
+  frontmatter.schema = {
+    dialect: frontmatter.schema.dialect,
+    value
+  };
+  return `---\n${stringify(frontmatter, { lineWidth: 0 })}---\n${body}`;
+}
+
+function parseFrontmatter(document, label) {
+  const match = /^---\r?\n([\s\S]*?)\r?\n---\r?\n([\s\S]*)$/u.exec(document);
+  if (!match) {
+    throw new Error(`Runtime resource ${label} has no YAML frontmatter.`);
+  }
+  return { frontmatter: parse(match[1]), body: match[2] };
+}
 
 function catalogSource(resource) {
   if (resource.kind === "contract") {

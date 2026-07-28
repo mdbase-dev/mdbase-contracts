@@ -11,7 +11,8 @@ without changing the published contract.
 
 The featured `mdbase.runtime.standard` pack supplies the durable runtime 0.2
 standard library: ten ordinary record contracts and canonical implementing
-types, plus inspectable timer-event and cancellation-action artifacts.
+types, the four canonical record-change events, and inspectable timer-event
+and cancellation-action artifacts.
 Installing it is passive and grants no execution authority.
 
 This repository is the canonical source. Its deterministic `dist/` output is
@@ -30,7 +31,9 @@ packs/<id>/<version>.pack.yaml     readable pack definitions
 dist/                              deterministic publication artifact
 ```
 
-The runtime pack is generated in `mdbase-spec` and imported exactly with:
+The runtime pack is generated in `mdbase-spec`. Contract and schema artifacts
+are imported byte-for-byte; its referenced canonical types are materialized as
+editable inline schema snapshots for the catalog:
 
 ```sh
 MDBASE_SPEC_DIR=../mdbase-spec npm run sync:runtime

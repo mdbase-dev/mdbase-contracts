@@ -30,6 +30,46 @@
       ]
     },
     {
+      "id": "mdbase.record.created",
+      "version": "1.0.0",
+      "name": "Record created",
+      "description": "Published after a record is created and derived collection state is consistent.",
+      "contract_type": "event",
+      "digest": "sha256:4c157f94e63d1f4fb1a74da640e03264ccb6c78cfa9f88ddb71b09c8bd6d1d44",
+      "artifact": "./artifacts/contracts/mdbase.record.created/1.0.0.md",
+      "standards": []
+    },
+    {
+      "id": "mdbase.record.deleted",
+      "version": "1.0.0",
+      "name": "Record deleted",
+      "description": "Published after a record is deleted and derived collection state is consistent.",
+      "contract_type": "event",
+      "digest": "sha256:cb4f4a09f9f9b1f7f5e2207de0074ce02fd89008c08386626fd964a29299f956",
+      "artifact": "./artifacts/contracts/mdbase.record.deleted/1.0.0.md",
+      "standards": []
+    },
+    {
+      "id": "mdbase.record.modified",
+      "version": "1.0.0",
+      "name": "Record modified",
+      "description": "Published after a record is modified and derived collection state is consistent.",
+      "contract_type": "event",
+      "digest": "sha256:2f670ef18bf7330fbba73861f41889ee946b33644074ca7366e88913f6e4d88a",
+      "artifact": "./artifacts/contracts/mdbase.record.modified/1.0.0.md",
+      "standards": []
+    },
+    {
+      "id": "mdbase.record.renamed",
+      "version": "1.0.0",
+      "name": "Record renamed",
+      "description": "Published after a record is renamed and derived collection state is consistent.",
+      "contract_type": "event",
+      "digest": "sha256:b6c507198379ba48408c9b48161a1c22d46dad2d291691af449167618484bb4c",
+      "artifact": "./artifacts/contracts/mdbase.record.renamed/1.0.0.md",
+      "standards": []
+    },
+    {
       "id": "mdbase.runtime.action-attempt",
       "version": "1.0.0",
       "name": "Durable action attempt",
@@ -123,9 +163,9 @@
       "id": "mdbase.runtime.timer.fired",
       "version": "1.0.0",
       "name": "Runtime timer fired",
-      "description": "Published when the current generation of a durable timer fires.",
+      "description": "Published with scheduling evidence and opaque application data when the current generation of a durable timer fires.",
       "contract_type": "event",
-      "digest": "sha256:730231fac07ad13dfaff74ff5ee25e26a75f48dd629a4ef8c4d52ffe6b62fb4b",
+      "digest": "sha256:9381a2c6778a3268758ac235e3c3b66991a769fa8e19f7303d4404b1e7e62bc6",
       "artifact": "./artifacts/contracts/mdbase.runtime.timer.fired/1.0.0.md",
       "standards": []
     },
@@ -172,11 +212,27 @@
       "version": "0.2.0",
       "name": "mdbase durable runtime standard library",
       "description": "Runtime record implementations and inspectable built-in event/action contracts.",
-      "digest": "sha256:1302c93f97c8b3b7a4032b73ab090cc177663b219f20b8eb9b3f5ec249d54255",
+      "digest": "sha256:998fa577db5ba3ac442f5ae06e721e247b9519613042b744cc4494e72c84e2e6",
       "provision": "./packs/mdbase.runtime.standard/0.2.0.json",
       "provides": [
         {
-          "id": "mdbase.runtime.workflow",
+          "id": "mdbase.runtime.action-attempt",
+          "version": "1.0.0"
+        },
+        {
+          "id": "mdbase.runtime.capability-grant",
+          "version": "1.0.0"
+        },
+        {
+          "id": "mdbase.runtime.checkpoint",
+          "version": "1.0.0"
+        },
+        {
+          "id": "mdbase.runtime.dead-letter",
+          "version": "1.0.0"
+        },
+        {
+          "id": "mdbase.runtime.diagnostic",
           "version": "1.0.0"
         },
         {
@@ -188,19 +244,7 @@
           "version": "1.0.0"
         },
         {
-          "id": "mdbase.runtime.capability-grant",
-          "version": "1.0.0"
-        },
-        {
           "id": "mdbase.runtime.run",
-          "version": "1.0.0"
-        },
-        {
-          "id": "mdbase.runtime.action-attempt",
-          "version": "1.0.0"
-        },
-        {
-          "id": "mdbase.runtime.checkpoint",
           "version": "1.0.0"
         },
         {
@@ -208,15 +252,11 @@
           "version": "1.0.0"
         },
         {
-          "id": "mdbase.runtime.diagnostic",
-          "version": "1.0.0"
-        },
-        {
-          "id": "mdbase.runtime.dead-letter",
+          "id": "mdbase.runtime.workflow",
           "version": "1.0.0"
         }
       ],
-      "resource_count": 35,
+      "resource_count": 43,
       "featured": true
     }
   ]

@@ -1,4 +1,8 @@
 {
+  "runtime_standard_pack": {
+    "repository": "mdbase-dev/mdbase-spec",
+    "ref": "92f0032a086cc265d3415189cbf6245e369b13c4"
+  },
   "typescript_implementation": {
     "repository": "callumalpass/mdbase",
     "ref": "83746e98825a02635ec10a2cad2ea28d5e4b0223"
