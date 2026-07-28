@@ -7,7 +7,10 @@ Published contract schemas are immutable interoperability boundaries. A
 catalog-listed starter type contains an inline snapshot of its starting schema
 instead of inheriting that boundary. Once installed, the type belongs to the
 collection: users can edit its fields and update the explicit contract mapping
-without changing the published contract.
+without changing the published contract. Packs authored with
+`expand_local_refs: true` expand every non-recursive local JSON Schema reference
+so nested fields remain directly editable. Recursive references remain explicit
+because they cannot be finitely expanded.
 
 The featured `mdbase.runtime.standard` pack supplies the durable runtime 0.2
 standard library: ten ordinary record contracts and canonical implementing
@@ -49,6 +52,13 @@ Requires Node.js 22+ and a built checkout of
 npm install
 npm run build
 npm run verify
+```
+
+When authoring a starter from an existing inline schema, expand its local
+references before adding it to a listed pack:
+
+```sh
+npm run expand:type -- types/example/1.md types/example/2.md
 ```
 
 Verification checks the catalog schema, every resource digest, a transactional
