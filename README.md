@@ -3,6 +3,12 @@
 First-party, versioned data contracts and transactional type packs for mdbase
 collections.
 
+Record contracts describe compact, application-facing semantics rather than
+storage layouts or external interchange formats. Their field names and schemas
+should say what an application can rely on while leaving collections free to
+choose local field names through explicit type mappings. Contract-specific
+behavior such as workflow vocabularies belongs in a validated `binding_schema`.
+
 Published contract schemas are immutable interoperability boundaries. A
 catalog-listed starter type contains an inline snapshot of its starting schema
 instead of inheriting that boundary. Once installed, the type belongs to the
@@ -78,3 +84,10 @@ A standards-oriented contract must identify its normative references and
 state its profile scope. An mdbase contract is not presented as an official
 schema from the referenced standards body unless that body actually publishes
 it as such.
+
+External interchange schemas should not be listed as general-purpose record
+contracts unless the installed type intentionally stores that exact shape.
+Converters and exporters can consume a smaller semantic record contract and
+produce the external format. Historical packs may set `catalog: false` to keep
+their immutable artifact URLs available without advertising them for new
+installations.

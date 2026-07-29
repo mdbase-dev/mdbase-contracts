@@ -1,4 +1,5 @@
 kind: mdbase.catalog-pack
+catalog: false
 id: mdbase.jscontact
 version: 2.0.3
 name: Contact type pack
