@@ -68,7 +68,7 @@ for (const packFile of packFiles) {
       await writeFile(schemaPath, document);
     }
 
-    if (resource.kind === "contract") {
+    if (resource.kind === "contract" && definition.catalog !== false) {
       registerContract(resource.source, document, resourceDigest);
     }
     if (resource.kind === "type" && definition.catalog !== false) {

@@ -1,0 +1,31 @@
+kind: mdbase.catalog-pack
+id: mdbase.contact
+version: 1.0.0
+name: Contact type pack
+description: A compact contact contract and a friendly, editable Contact type.
+display:
+  name: Contact
+  summary: Keep people and organisations with familiar names, email addresses, phone numbers, and birthdays.
+  category: people
+  audience: general
+  icon: address-book
+  badges:
+    - Portable contact semantics
+installation:
+  visibility: default
+  recommendation: user
+  primary_type: contact
+expand_local_refs: true
+provides:
+  - id: mdbase.contact
+    version: 1.0.0
+resources:
+  - kind: schema
+    source: schemas/mdbase.contact/1.0.0.schema.json
+    target: schemas/mdbase.contact/1.0.0.schema.json
+  - kind: contract
+    source: contracts/mdbase.contact/1.0.0.md
+    target: _contracts/mdbase.contact/1.0.0.md
+  - kind: type
+    source: types/contact/2.md
+    target: _types/contact.md
