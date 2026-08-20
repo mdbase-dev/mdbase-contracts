@@ -38,6 +38,7 @@ for (const packFile of packFiles) {
   const resources = [];
   const manifestResources = [];
   const installedTypes = [];
+  const providedContracts = new Map();
   for (const resource of definition.resources) {
     assertSafePath(resource.source, "resource source");
     assertSafePath(resource.target, "resource target");
@@ -71,6 +72,8 @@ for (const packFile of packFiles) {
 
     if (resource.kind === "contract" && definition.catalog !== false) {
       registerContract(resource.source, document, resourceDigest);
+      const reference = await contractReference(sourcePath, document);
+      providedContracts.set(`${reference.id}\0${reference.version}`, reference);
     }
     if (resource.kind === "type" && definition.catalog !== false) {
       validateEditableType(resource.source, document, definition.expand_local_refs === true);
@@ -82,6 +85,29 @@ for (const packFile of packFiles) {
     }
   }
 
+  const provides = definition.catalog === false
+    ? definition.provides
+    : definition.provides.map((provided) => {
+      const contract = providedContracts.get(`${provided.id}\0${provided.version}`);
+      if (!contract) {
+        fail(
+          `${relative(root, packFile)} provides ${provided.id} ${provided.version} `
+          + "without including its contract artifact.",
+        );
+      }
+      if (provided.digest !== undefined && provided.digest !== contract.digest) {
+        fail(
+          `${relative(root, packFile)} declares the wrong digest for `
+          + `${provided.id} ${provided.version}.`,
+        );
+      }
+      return {
+        id: provided.id,
+        version: provided.version,
+        digest: contract.digest,
+      };
+    });
+
   const provision = {
     manifest: {
       kind: "mdbase.type-pack",
@@ -92,7 +118,7 @@ for (const packFile of packFiles) {
       resources: manifestResources,
     },
     resources,
-    provides: definition.provides,
+    provides,
   };
   const provisionDocument = json(provision);
   const provisionPath = `packs/${definition.id}/${definition.version}.json`;
@@ -108,7 +134,7 @@ for (const packFile of packFiles) {
       description: definition.description,
       digest: digest(provisionDocument),
       provision: `./${provisionPath}`,
-      provides: definition.provides.map(({ id, version }) => ({ id, version })),
+      provides,
       resource_count: definition.resources.length,
       display: definition.display,
       installation: {
@@ -162,6 +188,78 @@ function registerContract(source, document, resourceDigest) {
     fail(`Contract ${frontmatter.id} ${frontmatter.version} has conflicting artifacts.`);
   }
   contracts.set(identity, entry);
+}
+
+async function contractReference(sourcePath, document) {
+  const frontmatter = matter(document).data;
+  const contractType = frontmatter.contract_type;
+  const portable = {
+    kind: frontmatter.kind,
+    contract_type: contractType,
+    id: frontmatter.id,
+    version: frontmatter.version,
+  };
+  for (const field of schemaFieldsForContractType(contractType)) {
+    const wrapper = frontmatter[field];
+    if (wrapper === undefined) continue;
+    if (!isPlainObject(wrapper)) {
+      fail(`${relative(root, sourcePath)} ${field} must be a schema wrapper.`);
+    }
+    if (Object.hasOwn(wrapper, "value")) {
+      portable[field] = wrapper.value;
+      continue;
+    }
+    if (typeof wrapper.ref !== "string" || wrapper.ref.length === 0) {
+      fail(`${relative(root, sourcePath)} ${field} must contain value or ref.`);
+    }
+    const schemaPath = resolve(dirname(sourcePath), wrapper.ref);
+    assertInside(root, schemaPath, `${relative(root, sourcePath)} ${field} ref`);
+    portable[field] = JSON.parse(await readFile(schemaPath, "utf8"));
+  }
+  if (contractType === "action" && isPlainObject(frontmatter.behavior)) {
+    portable.behavior = frontmatter.behavior;
+  }
+  return {
+    id: frontmatter.id,
+    version: frontmatter.version,
+    digest: digestCanonical(portable),
+  };
+}
+
+function schemaFieldsForContractType(contractType) {
+  if (contractType === "record") return ["record_schema", "binding_schema"];
+  if (contractType === "event") return ["data_schema", "source_schema"];
+  if (contractType === "action") {
+    return ["input_schema", "output_schema", "error_schema", "provider_schema"];
+  }
+  fail(`Unsupported contract type ${JSON.stringify(contractType)}.`);
+}
+
+function digestCanonical(value) {
+  return digest(canonicalJson(value));
+}
+
+function canonicalJson(value) {
+  if (
+    value === null
+    || typeof value === "boolean"
+    || typeof value === "string"
+  ) return JSON.stringify(value);
+  if (typeof value === "number") {
+    if (!Number.isFinite(value)) fail("Canonical JSON does not allow non-finite numbers.");
+    return JSON.stringify(value);
+  }
+  if (Array.isArray(value)) return `[${value.map(canonicalJson).join(",")}]`;
+  if (isPlainObject(value)) {
+    return `{${Object.keys(value).sort().map(
+      (key) => `${JSON.stringify(key)}:${canonicalJson(value[key])}`,
+    ).join(",")}}`;
+  }
+  fail(`Canonical JSON cannot encode ${typeof value}.`);
+}
+
+function isPlainObject(value) {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
 }
 
 function validateEditableType(source, document, requireExpandedReferences) {
