@@ -49,6 +49,7 @@ for (const packFile of packFiles) {
     resources.push({ source: resource.source, document });
     manifestResources.push({
       kind: resource.kind,
+      ...(resource.mode ? { mode: resource.mode } : {}),
       source: resource.source,
       target: resource.target,
       digest: resourceDigest,
@@ -107,7 +108,7 @@ for (const packFile of packFiles) {
       description: definition.description,
       digest: digest(provisionDocument),
       provision: `./${provisionPath}`,
-      provides: definition.provides,
+      provides: definition.provides.map(({ id, version }) => ({ id, version })),
       resource_count: definition.resources.length,
       display: definition.display,
       installation: {
@@ -222,6 +223,12 @@ function validatePackDefinition(value, label) {
     }
     if (typeof resource.source !== "string" || typeof resource.target !== "string") {
       fail(`${label} contains a resource without source and target paths.`);
+    }
+    if (
+      resource.mode !== undefined
+      && !["managed", "seed"].includes(resource.mode)
+    ) {
+      fail(`${label} contains an invalid resource mode.`);
     }
     if (!targets.add(resource.target)) fail(`${label} contains duplicate target ${resource.target}.`);
   }

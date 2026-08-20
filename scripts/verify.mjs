@@ -21,7 +21,9 @@ if (!ajv.validate(catalogSchema, catalog)) {
 
 const mdbaseDir = resolve(process.env.MDBASE_TS_DIR ?? join(root, "..", "mdbase"));
 const mdbaseEntry = join(mdbaseDir, "dist", "index.js");
-const { Collection, installTypePack } = await import(pathToFileURL(mdbaseEntry).href);
+const { Collection, applyTypePack, assessTypePack } = await import(
+  pathToFileURL(mdbaseEntry).href
+);
 
 for (const contract of catalog.contracts) {
   const artifact = await readCatalogArtifact(contract.artifact);
@@ -32,6 +34,7 @@ for (const pack of catalog.packs) {
   const provisionDocument = await readCatalogArtifact(pack.provision);
   assertDigest(provisionDocument, pack.digest, `pack ${pack.id} ${pack.version}`);
   const provision = json(provisionDocument);
+  const installProvision = withLegacyResourceModes(provision);
 
   for (const definition of provision.manifest.resources) {
     const resource = provision.resources.find(({ source }) => source === definition.source);
@@ -55,28 +58,33 @@ for (const pack of catalog.packs) {
       join(collectionRoot, "mdbase.yaml"),
       "spec_version: 0.3.0\nsettings:\n  validation: error\n",
     );
-    const dryRun = await installTypePack(
-      collectionRoot,
-      provision.manifest,
-      provision.resources,
-      { dryRun: true },
-    );
+    const assessmentOptions = { installedBy: catalog.id };
+    const dryRun = await assessTypePack(collectionRoot, installProvision, assessmentOptions);
     assertValid(dryRun, `${pack.id} dry run`);
     if (dryRun.result.resources.some(({ action }) => action !== "create")) {
       fail(`${pack.id} dry run did not plan only creates.`);
     }
 
-    assertValid(
-      await installTypePack(collectionRoot, provision.manifest, provision.resources),
-      `${pack.id} install`,
-    );
-    const repeated = await installTypePack(
+    assertValid(await applyTypePack(collectionRoot, installProvision, {
+      ...assessmentOptions,
+      expectedAssessmentDigest: dryRun.result.assessment_digest,
+    }), `${pack.id} install`);
+    const repeatedAssessment = await assessTypePack(
       collectionRoot,
-      provision.manifest,
-      provision.resources,
+      installProvision,
+      assessmentOptions,
     );
+    assertValid(repeatedAssessment, `${pack.id} repeat assessment`);
+    const repeated = await applyTypePack(collectionRoot, installProvision, {
+      ...assessmentOptions,
+      expectedAssessmentDigest: repeatedAssessment.result.assessment_digest,
+    });
     assertValid(repeated, `${pack.id} repeat install`);
-    if (repeated.result.resources.some(({ action }) => action !== "unchanged")) {
+    if (
+      repeated.result.resources.some(
+        ({ action }) => action !== "unchanged" && action !== "preserve",
+      )
+    ) {
       fail(`${pack.id} repeat install is not idempotent.`);
     }
 
@@ -114,6 +122,22 @@ async function readCatalogArtifact(relativeUrl) {
 function assertDigest(document, expected, label) {
   const actual = `sha256:${createHash("sha256").update(document).digest("hex")}`;
   if (actual !== expected) fail(`${label} has digest ${actual}; expected ${expected}.`);
+}
+
+function withLegacyResourceModes(provision) {
+  if (provision.manifest.resources.every(({ mode }) => mode !== undefined)) {
+    return provision;
+  }
+  return {
+    ...provision,
+    manifest: {
+      ...provision.manifest,
+      resources: provision.manifest.resources.map((resource) => ({
+        ...resource,
+        mode: resource.kind === "type" ? "seed" : "managed",
+      })),
+    },
+  };
 }
 
 function assertValid(result, label) {

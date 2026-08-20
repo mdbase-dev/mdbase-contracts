@@ -24,6 +24,11 @@ types, the four canonical record-change events, and inspectable timer-event
 and cancellation-action artifacts.
 Installing it is passive and grants no execution authority.
 
+The `tasknotes.task` pack is the canonical application-provisioned TaskNotes
+contract bundle. TaskNotes clients embed the published provision byte-for-byte
+and pin its catalog digest so independently deployed clients cannot drift onto
+different managed-pack versions.
+
 This repository is the canonical source. Its deterministic `dist/` output is
 published at `https://mdbase.dev/contracts/`. A catalog entry is only a
 discovery aid: every installable pack contains an exact manifest, embedded
