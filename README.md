@@ -24,6 +24,14 @@ types, the four canonical record-change events, and inspectable timer-event
 and cancellation-action artifacts.
 Installing it is passive and grants no execution authority.
 
+The `mdbase.contact` 1.1.0 pack adds `mdbase.person`: portable person IDs and
+editable issuer/subject account associations. Its Person starter also implements
+`mdbase.contact`, so contact apps can use the same notes. Both starters ship in
+one pack to preserve a single owner for the managed contact schema. Associations are ordinary collection data, never
+authentication or membership authority. See
+[`mdbase.person` 1.0.0](contracts/mdbase.person/1.0.0.md) for matching,
+ambiguity, privacy, and lifecycle semantics.
+
 The `tasknotes.task` pack is the canonical application-provisioned TaskNotes
 contract bundle. TaskNotes clients embed the published provision byte-for-byte
 and pin its catalog digest so independently deployed clients cannot drift onto

@@ -20,6 +20,16 @@
       "standards": []
     },
     {
+      "id": "mdbase.person",
+      "version": "1.0.0",
+      "name": "Person",
+      "description": "A portable person reference with editable account identity associations.",
+      "contract_type": "record",
+      "digest": "sha256:e2a9435ad01a2c06c151bf6af62a9d04aa30faa8e6128e4b5fe39378c767465c",
+      "artifact": "./artifacts/contracts/mdbase.person/1.0.0.md",
+      "standards": []
+    },
+    {
       "id": "mdbase.record.created",
       "version": "1.0.0",
       "name": "Record created",
@@ -224,6 +234,52 @@
           {
             "name": "contact",
             "label": "Contact"
+          }
+        ]
+      }
+    },
+    {
+      "id": "mdbase.contact",
+      "version": "1.1.0",
+      "name": "People and contacts type pack",
+      "description": "Portable people, editable account identity associations, and familiar contact fields.",
+      "digest": "sha256:f287cc0303a2771b13f8e7899ee5e37076334fc200fb4d2add87d7077632c670",
+      "provision": "./packs/mdbase.contact/1.1.0.json",
+      "provides": [
+        {
+          "id": "mdbase.person",
+          "version": "1.0.0",
+          "digest": "sha256:cda32ead27eaf70440efe3fadd8b5334df9af82f378b2af1bc786f7ab0bd0fc3"
+        },
+        {
+          "id": "mdbase.contact",
+          "version": "1.0.0",
+          "digest": "sha256:49cfe15403dfc741a693e89a2f4d2857de306f391d02cb03e67bfaf0aa1d6b0d"
+        }
+      ],
+      "resource_count": 6,
+      "display": {
+        "name": "People and contacts",
+        "summary": "Reference people across apps and collections without tying records to account membership.",
+        "category": "people",
+        "audience": "general",
+        "icon": "user",
+        "badges": [
+          "Portable person references"
+        ]
+      },
+      "installation": {
+        "visibility": "default",
+        "recommendation": "user",
+        "primary_type": "contact",
+        "types": [
+          {
+            "name": "contact",
+            "label": "Contact"
+          },
+          {
+            "name": "person",
+            "label": "Person"
           }
         ]
       }
