@@ -84,6 +84,21 @@ Verification checks the catalog schema, every resource digest, a transactional
 dry run, a real install, idempotent reinstallation, and the declared contract
 implementations.
 
+## TaskNotes assignment candidate
+
+The rc.13 TaskNotes pack introduces optional portable `assignees` through the
+rc.4 task contract and task type v2, without rewriting published rc.3 resources.
+The candidate was generated from `tasknotes-model` commit `7fa5d513a674` and
+`tasknotes-spec` commit `e814012c04be`. To regenerate from a built sibling model:
+
+```sh
+node scripts/sync-tasknotes-pack.mjs
+npm run build
+```
+
+The importer refuses to overwrite differing existing versioned artifacts.
+Publish this catalog candidate before consumers request its new immutable URLs.
+
 ## Publishing
 
 `mdbase.dev` pins a reviewed commit of this repository, builds it, and copies

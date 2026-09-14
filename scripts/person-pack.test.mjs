@@ -80,6 +80,21 @@ for (const versions of [["1.1.0"], ["1.0.0", "1.1.0"]]) {
       valid(await operations.create({
         path: "people/local.md", frontmatter: { type: "person", id: "person_local", name: "Local contact" },
       }));
+      const contact = valid(await operations.create({
+        path: "contacts/existing.md", body: "Keep this **Markdown** body.",
+        frontmatter: { type: "contact", id: "contact_existing", name: "Existing contact", email: "local@example.com", private_notes: "Collection-owned data" },
+      }));
+      const converted = valid(await operations.update({
+        path: "contacts/existing.md", if_revision: String(contact.revision),
+        fields: { type: "person", identities: [{ issuer: "https://connect.example", subject: "existing_account" }] },
+      }));
+      assert.equal(converted.frontmatter.id, "contact_existing");
+      assert.equal(converted.frontmatter.name, "Existing contact");
+      assert.equal(converted.frontmatter.email, "local@example.com");
+      assert.equal(converted.frontmatter.private_notes, "Collection-owned data");
+      assert.match(await readFile(join(collectionRoot, "contacts/existing.md"), "utf8"), /Keep this \*\*Markdown\*\* body\./);
+      const stale = await operations.update({ path: "contacts/existing.md", if_revision: String(contact.revision), fields: { name: "Stale overwrite" } });
+      assert.equal(stale.valid, false, "conversion must not bypass revision checks");
     } finally {
       await collection?.close();
       await rm(collectionRoot, { recursive: true, force: true });
