@@ -23,20 +23,26 @@ provides:
     version: 1.0.0
 resources:
   - kind: schema
+    mode: managed
     source: schemas/mdbase.person/1.0.0.schema.json
     target: schemas/mdbase.person/1.0.0.schema.json
   - kind: contract
+    mode: managed
     source: contracts/mdbase.person/1.0.0.md
     target: _contracts/mdbase.person/1.0.0.md
   - kind: schema
+    mode: managed
     source: schemas/mdbase.contact/1.0.0.schema.json
     target: schemas/mdbase.contact/1.0.0.schema.json
   - kind: contract
+    mode: managed
     source: contracts/mdbase.contact/1.0.0.md
     target: _contracts/mdbase.contact/1.0.0.md
   - kind: type
+    mode: seed
     source: types/contact/2.md
     target: _types/contact.md
   - kind: type
+    mode: seed
     source: types/person/1.md
     target: _types/person.md

@@ -27,7 +27,10 @@ Installing it is passive and grants no execution authority.
 The `mdbase.contact` 1.1.0 pack adds `mdbase.person`: portable person IDs and
 editable issuer/subject account associations. Its Person starter also implements
 `mdbase.contact`, so contact apps can use the same notes. Both starters ship in
-one pack to preserve a single owner for the managed contact schema. Associations are ordinary collection data, never
+one pack to preserve a single owner for the managed contact schema. Pack resources
+explicitly use `managed` for schemas/contracts and `seed` for editable starter
+types; install tests exercise the exact generated payload without supplying
+missing modes. Associations are ordinary collection data, never
 authentication or membership authority. See
 [`mdbase.person` 1.0.0](contracts/mdbase.person/1.0.0.md) for matching,
 ambiguity, privacy, and lifecycle semantics.

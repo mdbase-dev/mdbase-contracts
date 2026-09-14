@@ -20,8 +20,10 @@ async function install(collectionRoot, version) {
   const provision = JSON.parse(await readFile(
     join(root, "dist/packs/mdbase.contact", `${version}.json`), "utf8",
   ));
-  // Same legacy resource-mode compatibility used by the catalog verifier.
-  const input = {
+  // Only the immutable legacy pack needs compatibility. Test the new pack's
+  // exact distributed bytes: live hosted engines require explicit modes.
+  if (version !== "1.0.0") assert.ok(provision.manifest.resources.every((resource) => ["seed", "managed"].includes(resource.mode)));
+  const input = version !== "1.0.0" ? provision : {
     ...provision,
     manifest: {
       ...provision.manifest,

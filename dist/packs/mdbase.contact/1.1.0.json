@@ -8,36 +8,42 @@
     "resources": [
       {
         "kind": "schema",
+        "mode": "managed",
         "source": "schemas/mdbase.person/1.0.0.schema.json",
         "target": "schemas/mdbase.person/1.0.0.schema.json",
         "digest": "sha256:3254afaa98c895e84fdc0aba299e67a0f3b594681c5581313ece5fcf4e2c6d93"
       },
       {
         "kind": "contract",
+        "mode": "managed",
         "source": "contracts/mdbase.person/1.0.0.md",
         "target": "_contracts/mdbase.person/1.0.0.md",
         "digest": "sha256:e2a9435ad01a2c06c151bf6af62a9d04aa30faa8e6128e4b5fe39378c767465c"
       },
       {
         "kind": "schema",
+        "mode": "managed",
         "source": "schemas/mdbase.contact/1.0.0.schema.json",
         "target": "schemas/mdbase.contact/1.0.0.schema.json",
         "digest": "sha256:bd8a011d18c71164b633f4e82cb33faa5b658cdba4f89312a34c13bf46a350d2"
       },
       {
         "kind": "contract",
+        "mode": "managed",
         "source": "contracts/mdbase.contact/1.0.0.md",
         "target": "_contracts/mdbase.contact/1.0.0.md",
         "digest": "sha256:e3634a35737ada5eb62e3e15f1c0c9d2e27c55a3f98dfab94bbc14c40404903d"
       },
       {
         "kind": "type",
+        "mode": "seed",
         "source": "types/contact/2.md",
         "target": "_types/contact.md",
         "digest": "sha256:c925ac22674b5fa9b1a7b8b3af827e5ce3ba15e423b64487f626f5ab4cc1c80a"
       },
       {
         "kind": "type",
+        "mode": "seed",
         "source": "types/person/1.md",
         "target": "_types/person.md",
         "digest": "sha256:18896ac3086c7fdcb64748babd7dd8263dbece4fcc6bcf43a53f74d51bcece5e"

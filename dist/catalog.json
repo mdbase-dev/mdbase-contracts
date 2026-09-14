@@ -253,7 +253,7 @@
       "version": "1.1.0",
       "name": "People and contacts type pack",
       "description": "Portable people, editable account identity associations, and familiar contact fields.",
-      "digest": "sha256:f287cc0303a2771b13f8e7899ee5e37076334fc200fb4d2add87d7077632c670",
+      "digest": "sha256:14bba55df0574401b46ae08e5ef1e41e615d1477f70c3cc202eb9ff179287864",
       "provision": "./packs/mdbase.contact/1.1.0.json",
       "provides": [
         {
