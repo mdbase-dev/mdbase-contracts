@@ -133,6 +133,27 @@ test("the starter accepts local fields but only individual contacts", () => {
   assert.deepEqual(starter.collection.unique, [{ field: "id", scope: "collection" }]);
 });
 
+test("Person v2 documents every field without changing validation or contract mappings", async () => {
+  const updated = matter(await readFile(new URL("types/person/2.md", root), "utf8")).data;
+  assert.equal(updated.version, 2);
+  function withoutDescriptions(value) {
+    if (Array.isArray(value)) return value.map(withoutDescriptions);
+    if (!value || typeof value !== "object") return value;
+    return Object.fromEntries(Object.entries(value).filter(([key]) => key !== "description")
+      .map(([key, entry]) => [key, withoutDescriptions(entry)]));
+  }
+  function described(schema) {
+    assert.ok(schema.description?.length >= 30, "every field and identity entry needs useful guidance");
+    for (const child of Object.values(schema.properties ?? {})) described(child);
+    if (schema.items) described(schema.items);
+  }
+  described(updated.schema.value);
+  assert.deepEqual(withoutDescriptions(updated.schema.value), withoutDescriptions(starter.schema.value));
+  assert.deepEqual(updated.implements, starter.implements);
+  assert.deepEqual(updated.collection, starter.collection);
+  valid(ajv.compile(updated.schema.value), { type: "person", ...person, identities: [identity] });
+});
+
 test("cross-record identity ambiguity is not falsely presented as schema validation", () => {
   // Both records conform. Consumers must query every implementation and detect
   // the duplicate association rather than trusting either record as proof.

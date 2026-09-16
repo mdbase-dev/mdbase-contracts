@@ -24,10 +24,15 @@ types, the four canonical record-change events, and inspectable timer-event
 and cancellation-action artifacts.
 Installing it is passive and grants no execution authority.
 
-The `mdbase.contact` 1.1.0 pack adds `mdbase.person`: portable person IDs and
-editable issuer/subject account associations. Its Person starter also implements
-`mdbase.contact`, so contact apps can use the same notes. Both starters ship in
-one pack to preserve a single owner for the managed contact schema. Pack resources
+The `mdbase.contact` 1.2.0 pack offers one **Person** starter with portable IDs,
+editable issuer/subject account associations, and optional contact details. It
+implements both `mdbase.person` and `mdbase.contact`, so apps use the same notes.
+The pack keeps the existing resource owner, but no longer adds a separate Contact
+type to fresh collections. Older Contact types, notes, and customized Person types
+are preserved; there is no automatic migration. Older pack artifacts remain
+byte-identical at their versioned paths, but only the current pack is offered in the
+catalog. Person starter v2 adds field-level descriptions and usage guidance without
+changing validation or contract mappings. Pack resources
 explicitly use `managed` for schemas/contracts and `seed` for editable starter
 types; install tests exercise the exact generated payload without supplying
 missing modes. Associations are ordinary collection data, never

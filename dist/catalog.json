@@ -237,7 +237,7 @@
         ]
       },
       "installation": {
-        "visibility": "default",
+        "visibility": "hidden",
         "recommendation": "user",
         "primary_type": "contact",
         "types": [
@@ -279,7 +279,7 @@
         ]
       },
       "installation": {
-        "visibility": "default",
+        "visibility": "hidden",
         "recommendation": "user",
         "primary_type": "contact",
         "types": [
@@ -287,6 +287,48 @@
             "name": "contact",
             "label": "Contact"
           },
+          {
+            "name": "person",
+            "label": "Person"
+          }
+        ]
+      }
+    },
+    {
+      "id": "mdbase.contact",
+      "version": "1.2.0",
+      "name": "People type pack",
+      "description": "Portable people, editable account identity associations, and familiar contact fields.",
+      "digest": "sha256:de7cbe56389ca6b0e8193001fc3e3e6a1198633f155a5c2898da6ede4c499374",
+      "provision": "./packs/mdbase.contact/1.2.0.json",
+      "provides": [
+        {
+          "id": "mdbase.person",
+          "version": "1.0.0",
+          "digest": "sha256:cda32ead27eaf70440efe3fadd8b5334df9af82f378b2af1bc786f7ab0bd0fc3"
+        },
+        {
+          "id": "mdbase.contact",
+          "version": "1.0.0",
+          "digest": "sha256:49cfe15403dfc741a693e89a2f4d2857de306f391d02cb03e67bfaf0aa1d6b0d"
+        }
+      ],
+      "resource_count": 5,
+      "display": {
+        "name": "People",
+        "summary": "Reference people across apps and collections without tying records to account membership.",
+        "category": "people",
+        "audience": "general",
+        "icon": "user",
+        "badges": [
+          "Portable person references"
+        ]
+      },
+      "installation": {
+        "visibility": "default",
+        "recommendation": "user",
+        "primary_type": "person",
+        "types": [
           {
             "name": "person",
             "label": "Person"

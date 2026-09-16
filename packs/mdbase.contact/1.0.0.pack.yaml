@@ -12,7 +12,7 @@ display:
   badges:
     - Portable contact semantics
 installation:
-  visibility: default
+  visibility: hidden
   recommendation: user
   primary_type: contact
 expand_local_refs: true

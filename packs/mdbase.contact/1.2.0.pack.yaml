@@ -1,10 +1,10 @@
 kind: mdbase.catalog-pack
 id: mdbase.contact
-version: 1.1.0
-name: People and contacts type pack
+version: 1.2.0
+name: People type pack
 description: Portable people, editable account identity associations, and familiar contact fields.
 display:
-  name: People and contacts
+  name: People
   summary: Reference people across apps and collections without tying records to account membership.
   category: people
   audience: general
@@ -12,9 +12,9 @@ display:
   badges:
     - Portable person references
 installation:
-  visibility: hidden
+  visibility: default
   recommendation: user
-  primary_type: contact
+  primary_type: person
 expand_local_refs: true
 provides:
   - id: mdbase.person
@@ -40,9 +40,5 @@ resources:
     target: _contracts/mdbase.contact/1.0.0.md
   - kind: type
     mode: seed
-    source: types/contact/2.md
-    target: _types/contact.md
-  - kind: type
-    mode: seed
-    source: types/person/1.md
+    source: types/person/2.md
     target: _types/person.md
