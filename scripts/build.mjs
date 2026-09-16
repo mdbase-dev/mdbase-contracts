@@ -46,6 +46,17 @@ for (const packFile of packFiles) {
     assertInside(root, sourcePath, "resource source");
     const document = await readFile(sourcePath, "utf8");
     const resourceDigest = digest(document);
+    let upgradeFrom;
+    if (resource.upgrade_from !== undefined) {
+      if (resource.kind !== "type" || resource.mode !== "seed") {
+        fail("Only seed types may declare an upgrade baseline.");
+      }
+      assertSafePath(resource.upgrade_from, "upgrade baseline");
+      const baselinePath = resolve(root, resource.upgrade_from);
+      assertInside(root, baselinePath, "upgrade baseline");
+      const baseline = await readFile(baselinePath, "utf8");
+      upgradeFrom = { digest: digest(baseline), document: baseline };
+    }
 
     resources.push({ source: resource.source, document });
     manifestResources.push({
@@ -54,6 +65,7 @@ for (const packFile of packFiles) {
       source: resource.source,
       target: resource.target,
       digest: resourceDigest,
+      ...(upgradeFrom ? { upgrade_from: upgradeFrom } : {}),
     });
 
     const artifactPath = join(dist, "artifacts", resource.source);

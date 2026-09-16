@@ -87,6 +87,19 @@ Verification checks the catalog schema, every resource digest, a transactional
 dry run, a real install, idempotent reinstallation, and the declared contract
 implementations.
 
+The TaskNotes rc.14 candidate explicitly upgrades the rc.12 starter using a
+digest-pinned baseline. It requires an engine with seed-upgrade support; older
+engines reject it rather than silently skipping the upgrade. Published rc.12
+and rc.13 bytes remain unchanged. To verify with the updated Rust engine:
+
+```sh
+MDBASE_VERIFY_CLI=/absolute/path/to/mdbase npm test
+```
+
+This runs dry-run/install/idempotency checks through that local CLI against
+throwaway collections, then reopens the installed definitions with mdbase-ts.
+It does not claim that older mdbase-ts versions can execute seed upgrades.
+
 ## TaskNotes assignment candidate
 
 The rc.13 TaskNotes pack introduces optional portable `assignees` through the
