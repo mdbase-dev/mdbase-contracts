@@ -78,6 +78,9 @@ for (const versions of [["1.1.0"], ["1.0.0", "1.1.0"], ["1.2.0"], ["1.0.0", "1.2
       const legacyContact = "---\ntype: contact\nname: Existing contact\nid: legacy_contact\nprivate_notes: Keep me\n---\nOriginal **contact** body.\n";
       const legacyPerson = "---\ntype: person\nname: Existing person\nid: legacy_person\n---\nOriginal **person** body.\n";
       const hasContact = versions.some((version) => version !== "1.2.0");
+      // A Person type customized under 1.1.0 is a user-owned seed and is kept.
+      const personV2 = !versions.includes("1.1.0");
+      const personContract = personV2 ? "2.0.0" : "1.0.0";
       for (const version of versions) {
         await install(collectionRoot, version);
         if (version !== "1.2.0") {
@@ -106,24 +109,26 @@ for (const versions of [["1.1.0"], ["1.0.0", "1.1.0"], ["1.2.0"], ["1.0.0", "1.2
       collection = opened.collection;
       assert.ok(collection);
       assert.equal(collection.getDataContractImplementations("mdbase.contact", "1.0.0").length, hasContact ? 2 : 1);
-      assert.equal(collection.getDataContractImplementations("mdbase.person", "1.0.0").length, 1);
+      assert.equal(collection.getDataContractImplementations("mdbase.person", personContract).length, 1);
       const operations = collection.v03Operations();
+      const id = (value) => (personV2 ? {} : { id: value });
       const frontmatter = {
-        type: "person", id: "person_one", name: "Callum",
+        type: "person", ...id("person_one"), name: "Callum",
         identities: [{ issuer: "https://connect.example", subject: "usr_one" }],
       };
       valid(await operations.create({ path: "people/callum.md", frontmatter }));
       const duplicate = await operations.create({ path: "people/duplicate.md", frontmatter });
-      assert.equal(duplicate.valid, false, "starter must reject duplicate person IDs");
+      // Person 2.0.0 has no ID to keep unique; duplicate identity claims are
+      // valid records that consumers must report as ambiguous.
+      assert.equal(duplicate.valid, personV2, "only the 1.x starter rejects duplicate person IDs");
       valid(await operations.rename({ from: "people/callum.md", to: "contacts/callum.md" }));
       const document = await readFile(join(collectionRoot, "contacts/callum.md"), "utf8");
-      assert.match(document, /person_one/);
       assert.match(document, /usr_one/);
       valid(await operations.create({
-        path: "people/local.md", frontmatter: { type: "person", id: "person_local", name: "Local contact" },
+        path: "people/local.md", frontmatter: { type: "person", ...id("person_local"), name: "Local contact" },
       }));
       if (!hasContact) {
-        valid(await operations.create({ path: "people/details.md", frontmatter: { type: "person", id: "person_details", name: "With contact details", email: "local@example.com", phone: "+44 20 1234 5678", organisation: "Example", birthday: "2000-01-02" } }));
+        valid(await operations.create({ path: "people/details.md", frontmatter: { type: "person", name: "With contact details", email: "local@example.com", phone: "+44 20 1234 5678", organisation: "Example", birthday: "2000-01-02" } }));
       } else {
         const contact = valid(await operations.create({
           path: "contacts/existing.md", body: "Keep this **Markdown** body.",

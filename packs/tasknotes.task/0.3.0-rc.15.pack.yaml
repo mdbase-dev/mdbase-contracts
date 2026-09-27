@@ -1,0 +1,40 @@
+kind: mdbase.catalog-pack
+id: tasknotes.task
+version: 0.3.0-rc.15
+name: TaskNotes task type pack
+description: Portable tasks whose assignments link to person records, with a reviewed, atomic starter upgrade.
+display:
+  name: TaskNotes tasks
+  summary: Manage portable Markdown tasks, assignments, dates, recurrence, reminders, and time tracking.
+  category: work
+  audience: general
+  icon: square-check-big
+  badges:
+    - TaskNotes compatible
+installation:
+  visibility: default
+  recommendation: integration-managed
+  primary_type: task
+  caution: Upgrades the previous starter type while preserving independent customizations. Conflicts or other references to the previous contract block the whole upgrade.
+provides:
+  - id: tasknotes.task
+    version: 0.3.0-rc.5
+    digest: sha256:dde71d0d776aa0069ee627fe3c10b1a20f87ba36929a16790598ebfb4e8ebf04
+resources:
+  - kind: contract
+    mode: managed
+    source: contracts/tasknotes.task/0.3.0-rc.5.md
+    target: _contracts/tasknotes.task.md
+  - kind: type
+    mode: seed
+    source: types/tasknotes-task/3.md
+    target: _types/task.md
+    upgrade_from: types/tasknotes-task/1.md
+  - kind: schema
+    mode: managed
+    source: schemas/tasknotes.task/0.3.0-rc.5.schema.json
+    target: _schemas/tasknotes/tasknotes-task.schema.json
+  - kind: schema
+    mode: managed
+    source: schemas/tasknotes.task.binding/0.3.0-rc.5.schema.json
+    target: _schemas/tasknotes/tasknotes-task-binding.schema.json

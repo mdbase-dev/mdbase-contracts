@@ -19,8 +19,13 @@ async function reviewedInstall(engine) {
   return engine.apply(assessment.result.assessment_digest, adoptions);
 }
 
-for (const scenario of ["managed", "customized", "unmanaged", "conflict", "other-reference"]) {
-  test(`TaskNotes rc.12 upgrade: ${scenario}`, { skip: !command }, async () => {
+const targets = [
+  { pack: "0.3.0-rc.14", contract: /0\.3\.0-rc\.4/ },
+  // rc.15 turns assignees into collection-declared links to person records.
+  { pack: "0.3.0-rc.15", contract: /0\.3\.0-rc\.5/, links: /assignees\[\]:/ },
+];
+for (const target of targets) for (const scenario of ["managed", "customized", "unmanaged", "conflict", "other-reference"]) {
+  test(`TaskNotes rc.12 to ${target.pack} upgrade: ${scenario}`, { skip: !command }, async () => {
     const root = await mkdtemp(join(tmpdir(), "tasknotes-upgrade-test-"));
     const engines = [];
     try {
@@ -55,7 +60,7 @@ for (const scenario of ["managed", "customized", "unmanaged", "conflict", "other
         assert.equal((await reviewedInstall(await engine(await load("0.3.0-rc.13")))).valid, false);
         for (const [path, document] of before) assert.equal(await readFile(join(root, path), "utf8"), document);
       }
-      const result = await reviewedInstall(await engine(await load("0.3.0-rc.14")));
+      const result = await reviewedInstall(await engine(await load(target.pack)));
       const success = !["conflict", "other-reference"].includes(scenario);
       assert.equal(result.valid, success, JSON.stringify(result));
       assert.equal(await readFile(join(root, "task.md"), "utf8"), task);
@@ -64,7 +69,8 @@ for (const scenario of ["managed", "customized", "unmanaged", "conflict", "other
       } else {
         const upgraded = await readFile(typePath, "utf8");
         assert.match(upgraded, /assignees/);
-        assert.match(upgraded, /0\.3\.0-rc\.4/);
+        assert.match(upgraded, target.contract);
+        if (target.links) assert.match(upgraded, target.links);
         if (scenario === "customized") {
           assert.match(upgraded, /title: heading/);
           assert.ok(upgraded.endsWith("Custom documentation.\n"));

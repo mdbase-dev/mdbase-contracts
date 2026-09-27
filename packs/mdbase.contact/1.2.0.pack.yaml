@@ -18,10 +18,12 @@ installation:
 expand_local_refs: true
 provides:
   - id: mdbase.person
-    version: 1.0.0
+    version: 2.0.0
   - id: mdbase.contact
     version: 1.0.0
 resources:
+  # Not provided for new installs: retained so Person types customised under
+  # 1.1.0 keep the exact contract they implement.
   - kind: schema
     mode: managed
     source: schemas/mdbase.person/1.0.0.schema.json
@@ -30,6 +32,14 @@ resources:
     mode: managed
     source: contracts/mdbase.person/1.0.0.md
     target: _contracts/mdbase.person/1.0.0.md
+  - kind: schema
+    mode: managed
+    source: schemas/mdbase.person/2.0.0.schema.json
+    target: schemas/mdbase.person/2.0.0.schema.json
+  - kind: contract
+    mode: managed
+    source: contracts/mdbase.person/2.0.0.md
+    target: _contracts/mdbase.person/2.0.0.md
   - kind: schema
     mode: managed
     source: schemas/mdbase.contact/1.0.0.schema.json

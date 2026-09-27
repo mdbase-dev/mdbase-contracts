@@ -95,7 +95,12 @@ implementations.
 The TaskNotes rc.14 candidate explicitly upgrades the rc.12 starter using a
 digest-pinned baseline. It requires an engine with seed-upgrade support; older
 engines reject it rather than silently skipping the upgrade. Published rc.12
-and rc.13 bytes remain unchanged. To verify with the updated Rust engine:
+and rc.13 bytes remain unchanged. The rc.15 candidate upgrades the same rc.12
+starter to contract rc.5, where `assignees` are links to `mdbase.person` 2.0.0
+records declared in `collection.links`; Person 2.0.0 drops the separate `id`.
+The People pack 1.2.0 keeps shipping `mdbase.person` 1.0.0 so Person types
+customised under 1.1.0 continue to validate. To verify with the updated Rust
+engine:
 
 ```sh
 MDBASE_VERIFY_CLI=/absolute/path/to/mdbase npm test

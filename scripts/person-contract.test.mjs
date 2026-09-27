@@ -133,25 +133,27 @@ test("the starter accepts local fields but only individual contacts", () => {
   assert.deepEqual(starter.collection.unique, [{ field: "id", scope: "collection" }]);
 });
 
-test("Person v2 documents every field without changing validation or contract mappings", async () => {
+test("Person v2 implements the link-referenced Person 2.0.0 contract without an ID", async () => {
   const updated = matter(await readFile(new URL("types/person/2.md", root), "utf8")).data;
+  const personV2Schema = JSON.parse(await readFile(new URL("schemas/mdbase.person/2.0.0.schema.json", root), "utf8"));
   assert.equal(updated.version, 2);
-  function withoutDescriptions(value) {
-    if (Array.isArray(value)) return value.map(withoutDescriptions);
-    if (!value || typeof value !== "object") return value;
-    return Object.fromEntries(Object.entries(value).filter(([key]) => key !== "description")
-      .map(([key, entry]) => [key, withoutDescriptions(entry)]));
-  }
   function described(schema) {
     assert.ok(schema.description?.length >= 30, "every field and identity entry needs useful guidance");
     for (const child of Object.values(schema.properties ?? {})) described(child);
     if (schema.items) described(schema.items);
   }
   described(updated.schema.value);
-  assert.deepEqual(withoutDescriptions(updated.schema.value), withoutDescriptions(starter.schema.value));
-  assert.deepEqual(updated.implements, starter.implements);
-  assert.deepEqual(updated.collection, starter.collection);
-  valid(ajv.compile(updated.schema.value), { type: "person", ...person, identities: [identity] });
+  assert.equal(Object.hasOwn(updated.schema.value.properties, "id"), false);
+  assert.equal(updated.collection.unique, undefined);
+  const personImplementation = updated.implements.find(({ contract }) => contract === "mdbase.person");
+  assert.equal(personImplementation.version, "2.0.0");
+  assert.deepEqual(personImplementation.fields, { name: "name", identities: "identities" });
+  assert.deepEqual(updated.implements.find(({ contract }) => contract === "mdbase.contact"),
+    starter.implements.find(({ contract }) => contract === "mdbase.contact"));
+  const record = { type: "person", name: "Callum", identities: [identity] };
+  valid(ajv.compile(updated.schema.value), record);
+  valid(ajv.compile(personV2Schema), { name: record.name, identities: record.identities });
+  assert.equal(ajv.compile(personV2Schema)({ id: "no-longer-part-of-the-contract", name: "Callum" }), false);
 });
 
 test("cross-record identity ambiguity is not falsely presented as schema validation", () => {
