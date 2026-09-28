@@ -26,6 +26,9 @@ const targets = [
   // rc.16 is rc.12's starter plus assignees only; rc.15 also dropped the
   // cancelled status and changed unrelated defaults.
   { pack: "0.3.0-rc.16", contract: /0\.3\.0-rc\.5/, links: /assignees\[\]:/, minimal: true },
+  // rc.17 also leaves the collection's generator bookkeeping alone, which
+  // follows its field mapping (rc.16 conflicted with a customized list).
+  { pack: "0.3.0-rc.17", contract: /0\.3\.0-rc\.5/, links: /assignees\[\]:/, minimal: true, customMapping: true },
 ];
 
 // Everything an upgrade may change in the starter type: assignees and versions.
@@ -40,8 +43,9 @@ function withoutAssignees(document) {
   type["x-tasknotes-generator"].managed_fields = type["x-tasknotes-generator"].managed_fields.filter((field) => field !== "assignees");
   return type;
 }
-for (const target of targets) for (const scenario of ["managed", "customized", "generator-defaults", "unmanaged", "conflict", "other-reference"]) {
+for (const target of targets) for (const scenario of ["managed", "customized", "generator-defaults", "custom-mapping", "unmanaged", "conflict", "other-reference"]) {
   if (scenario === "generator-defaults" && !target.minimal) continue;
+  if (scenario === "custom-mapping" && !target.customMapping) continue;
   test(`TaskNotes rc.12 to ${target.pack} upgrade: ${scenario}`, { skip: !command }, async () => {
     const root = await mkdtemp(join(tmpdir(), "tasknotes-upgrade-test-"));
     const engines = [];
@@ -68,6 +72,10 @@ for (const target of targets) for (const scenario of ["managed", "customized", "
         // Collections set up by earlier TaskNotes generators carry their own
         // status colours; an upgrade must keep them, and keep cancelled.
         await writeFile(typePath, oldType.replaceAll("#94a3b8", "#cccccc").replace("#64748b", "#808080").replace("#3b82f6", "#0066cc"));
+      }
+      if (scenario === "custom-mapping") {
+        // A collection whose due field is named "deadline" lists it in its bookkeeping.
+        await writeFile(typePath, oldType.replace("\n    - due\n", "\n    - deadline\n"));
       }
       if (scenario === "conflict") await writeFile(typePath, oldType.replace("version: 1\n", "version: 99\n"));
       if (scenario === "other-reference") await writeFile(join(root, "_types/other.md"), oldType.replace("name: task", "name: other"));

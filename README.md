@@ -112,8 +112,8 @@ It does not claim that older mdbase-ts versions can execute seed upgrades.
 
 ## TaskNotes assignments
 
-The rc.16 TaskNotes pack introduces optional `assignees` through the rc.5 task
-contract and task type v4: links to records implementing `mdbase.person` 2.0.0,
+The rc.17 TaskNotes pack introduces optional `assignees` through the rc.5 task
+contract and task type v4 (starter revision 5): links to records implementing `mdbase.person` 2.0.0,
 declared as links so engines resolve them. It upgrades collections that seeded
 rc.12's task type 1 with a digest-pinned seed-type upgrade, without rewriting
 published rc.3 resources. Type v4 is rc.12's type v1 plus the assignees field,
@@ -123,8 +123,19 @@ and also dropped the `cancelled` status and changed colours and profiles; it,
 and the superseded person-ID candidates rc.13 and rc.14, remain available at
 their immutable URLs but are not listed (`catalog: false`).
 
-Derive a new starter type from the previous one by the intended change, not by
-regenerating it: the upgrade tests check that nothing else changes.
+rc.17's starter is rc.16's with the generator bookkeeping
+(`x-tasknotes-generator.managed_fields`) left as rc.12 published it: each
+collection's list follows its own field mapping, so an upgrade that changed it
+conflicted wherever that mapping was customized. rc.16 is not listed.
+
+Starter files are named by revision (`types/tasknotes-task/<revision>.md`); a
+revision that does not change the task data keeps the type `version`, so
+collections already at that version upgrade without a version conflict.
+
+The starter is defined by `@tasknotes/model/starter`, which reproduces the
+published starter byte for byte; `scripts/sync-tasknotes-pack.mjs` generates it
+from there. The upgrade tests check that a new starter changes nothing beyond
+its declared changes.
 
 To regenerate from a built sibling model:
 
