@@ -3,6 +3,7 @@ id: tasknotes.task
 version: 0.3.0-rc.13
 name: TaskNotes task type pack
 description: Portable TaskNotes tasks with person-ID assignments.
+catalog: false
 display:
   name: TaskNotes tasks
   summary: Manage portable Markdown tasks, assignments, dates, recurrence, reminders, and time tracking.

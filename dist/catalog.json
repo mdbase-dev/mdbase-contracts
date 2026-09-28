@@ -211,16 +211,6 @@
     },
     {
       "id": "tasknotes.task",
-      "version": "0.3.0-rc.4",
-      "name": "TaskNotes task",
-      "description": "Portable task data and behavior defined by tasknotes-spec 0.3.0-rc.4.",
-      "contract_type": "record",
-      "digest": "sha256:91165b7664f936bba9289aca984e2638901db7fedf68642ab755e8d0b424e734",
-      "artifact": "./artifacts/contracts/tasknotes.task/0.3.0-rc.4.md",
-      "standards": []
-    },
-    {
-      "id": "tasknotes.task",
       "version": "0.3.0-rc.5",
       "name": "TaskNotes task",
       "description": "Portable task data and behavior defined by tasknotes-spec 0.3.0-rc.5.",
@@ -505,82 +495,6 @@
         "recommendation": "integration-managed",
         "primary_type": "task",
         "caution": "TaskNotes applications manage the contract and schemas; the installed task type remains editable.",
-        "types": [
-          {
-            "name": "task",
-            "label": "Task"
-          }
-        ]
-      }
-    },
-    {
-      "id": "tasknotes.task",
-      "version": "0.3.0-rc.13",
-      "name": "TaskNotes task type pack",
-      "description": "Portable TaskNotes tasks with person-ID assignments.",
-      "digest": "sha256:0766d4cab0c94e2375681f7f003be44457ef533b017bd6b7398732a28e773da3",
-      "provision": "./packs/tasknotes.task/0.3.0-rc.13.json",
-      "provides": [
-        {
-          "id": "tasknotes.task",
-          "version": "0.3.0-rc.4",
-          "digest": "sha256:6948f659df6af05ef95aa893f1d57849032546e8c6cfee8afd5afe566e4ceeb0"
-        }
-      ],
-      "resource_count": 4,
-      "display": {
-        "name": "TaskNotes tasks",
-        "summary": "Manage portable Markdown tasks, assignments, dates, recurrence, reminders, and time tracking.",
-        "category": "work",
-        "audience": "general",
-        "icon": "square-check-big",
-        "badges": [
-          "TaskNotes compatible"
-        ]
-      },
-      "installation": {
-        "visibility": "default",
-        "recommendation": "integration-managed",
-        "primary_type": "task",
-        "caution": "TaskNotes applications manage the contract and schemas; existing task types require explicit mapping to the new contract version.",
-        "types": [
-          {
-            "name": "task",
-            "label": "Task"
-          }
-        ]
-      }
-    },
-    {
-      "id": "tasknotes.task",
-      "version": "0.3.0-rc.14",
-      "name": "TaskNotes task type pack",
-      "description": "Portable tasks with a reviewed, atomic assignment upgrade.",
-      "digest": "sha256:00ca1bc71d8c9c9b05ec60616979d7256bb19f5903a1746b3913adb587db50cf",
-      "provision": "./packs/tasknotes.task/0.3.0-rc.14.json",
-      "provides": [
-        {
-          "id": "tasknotes.task",
-          "version": "0.3.0-rc.4",
-          "digest": "sha256:6948f659df6af05ef95aa893f1d57849032546e8c6cfee8afd5afe566e4ceeb0"
-        }
-      ],
-      "resource_count": 4,
-      "display": {
-        "name": "TaskNotes tasks",
-        "summary": "Manage portable Markdown tasks, assignments, dates, recurrence, reminders, and time tracking.",
-        "category": "work",
-        "audience": "general",
-        "icon": "square-check-big",
-        "badges": [
-          "TaskNotes compatible"
-        ]
-      },
-      "installation": {
-        "visibility": "default",
-        "recommendation": "integration-managed",
-        "primary_type": "task",
-        "caution": "Upgrades the previous starter type while preserving independent customizations. Conflicts or other references to the previous contract block the whole upgrade.",
         "types": [
           {
             "name": "task",

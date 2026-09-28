@@ -21,6 +21,10 @@ jobs:
         run: |
           echo "repository=$(jq -r '.typescript_implementation.repository' sources.json)" >> "$GITHUB_OUTPUT"
           echo "ref=$(jq -r '.typescript_implementation.ref' sources.json)" >> "$GITHUB_OUTPUT"
+          echo "cli_repository=$(jq -r '.seed_upgrade_cli.repository' sources.json)" >> "$GITHUB_OUTPUT"
+          echo "cli_ref=$(jq -r '.seed_upgrade_cli.ref' sources.json)" >> "$GITHUB_OUTPUT"
+          echo "engine_repository=$(jq -r '.seed_upgrade_cli.engine_repository' sources.json)" >> "$GITHUB_OUTPUT"
+          echo "engine_ref=$(jq -r '.seed_upgrade_cli.engine_ref' sources.json)" >> "$GITHUB_OUTPUT"
 
       - name: Check out TypeScript implementation
         uses: actions/checkout@v7
@@ -28,6 +32,30 @@ jobs:
           repository: ${{ steps.sources.outputs.repository }}
           ref: ${{ steps.sources.outputs.ref }}
           path: .sources/mdbase
+
+      # mdbase-ts cannot execute seed-type upgrades, so installs are verified
+      # through an mdbase CLI built on the Rust engine that can.
+      - name: Check out mdbase CLI
+        uses: actions/checkout@v7
+        with:
+          repository: ${{ steps.sources.outputs.cli_repository }}
+          ref: ${{ steps.sources.outputs.cli_ref }}
+          path: .sources/cli/mdbase-connect
+
+      - name: Check out its Rust engine
+        uses: actions/checkout@v7
+        with:
+          repository: ${{ steps.sources.outputs.engine_repository }}
+          ref: ${{ steps.sources.outputs.engine_ref }}
+          path: .sources/cli/mdbase-rs
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: .sources/cli/mdbase-connect
+
+      - name: Build mdbase CLI
+        working-directory: .sources/cli/mdbase-connect
+        run: cargo build --locked -p mdbase-cli --bin mdbase
 
       - uses: actions/setup-node@v7
         with:
@@ -45,6 +73,7 @@ jobs:
         run: npm test
         env:
           MDBASE_TS_DIR: .sources/mdbase
+          MDBASE_VERIFY_CLI: ${{ github.workspace }}/.sources/cli/mdbase-connect/target/debug/mdbase
 
       - name: Check deterministic publication output
         run: git diff --exit-code -- dist

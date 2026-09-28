@@ -110,12 +110,16 @@ This runs dry-run/install/idempotency checks through that local CLI against
 throwaway collections, then reopens the installed definitions with mdbase-ts.
 It does not claim that older mdbase-ts versions can execute seed upgrades.
 
-## TaskNotes assignment candidate
+## TaskNotes assignments
 
-The rc.13 TaskNotes pack introduces optional portable `assignees` through the
-rc.4 task contract and task type v2, without rewriting published rc.3 resources.
-The candidate was generated from `tasknotes-model` commit `7fa5d513a674` and
-`tasknotes-spec` commit `e814012c04be`. To regenerate from a built sibling model:
+The rc.15 TaskNotes pack introduces optional `assignees` through the rc.5 task
+contract and task type v3: links to records implementing `mdbase.person` 2.0.0,
+declared as links so engines resolve them. It upgrades collections that seeded
+rc.12's task type 1 with a digest-pinned seed-type upgrade, without rewriting
+published rc.3 resources. rc.13 and rc.14, the superseded person-ID candidates,
+remain available at their immutable URLs but are not listed (`catalog: false`).
+
+To regenerate from a built sibling model:
 
 ```sh
 node scripts/sync-tasknotes-pack.mjs
@@ -123,7 +127,7 @@ npm run build
 ```
 
 The importer refuses to overwrite differing existing versioned artifacts.
-Publish this catalog candidate before consumers request its new immutable URLs.
+Publish this catalog before consumers request its new immutable URLs.
 
 ## Publishing
 

@@ -6,5 +6,11 @@
   "typescript_implementation": {
     "repository": "callumalpass/mdbase",
     "ref": "3c9c89b8000b925d6e584cce4e06c610ce42fd5d"
+  },
+  "seed_upgrade_cli": {
+    "repository": "mdbase-dev/mdbase-connect",
+    "ref": "62242c21e754d27fee068e32ace02408bb572906",
+    "engine_repository": "callumalpass/mdbase-rs",
+    "engine_ref": "c456e71b578c527448501ef7aec25825f13a9bea"
   }
 }
