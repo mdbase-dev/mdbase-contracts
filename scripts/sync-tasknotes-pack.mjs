@@ -4,8 +4,11 @@ import { pathToFileURL, fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const model = resolve(process.env.TASKNOTES_MODEL_DIR ?? join(root, "..", "tasknotes-model"));
-const { buildTaskNotesMdbaseResources, buildTaskNotesMdbaseTypePack, TASKNOTES_TASK_CONTRACT_VERSION } = await import(pathToFileURL(join(model, "dist/esm/mdbase.js")).href);
-const resources = buildTaskNotesMdbaseResources();
+const { buildTaskNotesMdbaseTypePack, TASKNOTES_TASK_CONTRACT_VERSION } = await import(pathToFileURL(join(model, "dist/esm/mdbase.js")).href);
+// The published starter, not the model's plugin defaults: those omit the
+// cancelled status and declare profiles the starter does not implement.
+const { buildTaskNotesStarterResources } = await import(pathToFileURL(join(model, "dist/esm/starter.js")).href);
+const resources = buildTaskNotesStarterResources();
 // Also verifies the model's pinned semantic digest before importing anything.
 await buildTaskNotesMdbaseTypePack(resources);
 const version = TASKNOTES_TASK_CONTRACT_VERSION;
