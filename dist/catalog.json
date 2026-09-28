@@ -210,6 +210,16 @@
       "standards": []
     },
     {
+      "id": "obsidian.base",
+      "version": "1.0.0",
+      "name": "Obsidian Base",
+      "description": "An Obsidian Bases saved-view source stored as a YAML document record.",
+      "contract_type": "record",
+      "digest": "sha256:fca77a9c845223784d4af7f5e13e2f149295621ad1b794ea9bb4d99f604467e8",
+      "artifact": "./artifacts/contracts/obsidian.base/1.0.0.md",
+      "standards": []
+    },
+    {
       "id": "tasknotes.task",
       "version": "0.3.0-rc.3",
       "name": "TaskNotes task",
@@ -508,6 +518,43 @@
           {
             "name": "view",
             "label": "View"
+          }
+        ]
+      }
+    },
+    {
+      "id": "obsidian.base",
+      "version": "1.0.0",
+      "name": "Obsidian Bases",
+      "description": "The obsidian.base contract and an editable type that stores Obsidian Bases as records.",
+      "digest": "sha256:8251b351a4b00c4ea3f4d49988ae45ab52ceaf2420f57ce8105ca4cfe5eafd50",
+      "provision": "./packs/obsidian.base/1.0.0.json",
+      "provides": [
+        {
+          "id": "obsidian.base",
+          "version": "1.0.0",
+          "digest": "sha256:37e8a0bfb32bb4795c1b3c5dec613c32429aaa765dc33e4adc0c627a48f5c1ff"
+        }
+      ],
+      "resource_count": 2,
+      "display": {
+        "name": "Obsidian Bases",
+        "summary": "Use Obsidian Bases files as saved views that any view-aware app can list and run.",
+        "category": "work",
+        "audience": "general",
+        "icon": "table",
+        "badges": [
+          "Obsidian compatible"
+        ]
+      },
+      "installation": {
+        "visibility": "default",
+        "recommendation": "optional",
+        "primary_type": "obsidian_base",
+        "types": [
+          {
+            "name": "obsidian_base",
+            "label": "Obsidian base"
           }
         ]
       }
