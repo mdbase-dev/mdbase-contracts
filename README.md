@@ -112,12 +112,19 @@ It does not claim that older mdbase-ts versions can execute seed upgrades.
 
 ## TaskNotes assignments
 
-The rc.15 TaskNotes pack introduces optional `assignees` through the rc.5 task
-contract and task type v3: links to records implementing `mdbase.person` 2.0.0,
+The rc.16 TaskNotes pack introduces optional `assignees` through the rc.5 task
+contract and task type v4: links to records implementing `mdbase.person` 2.0.0,
 declared as links so engines resolve them. It upgrades collections that seeded
 rc.12's task type 1 with a digest-pinned seed-type upgrade, without rewriting
-published rc.3 resources. rc.13 and rc.14, the superseded person-ID candidates,
-remain available at their immutable URLs but are not listed (`catalog: false`).
+published rc.3 resources. Type v4 is rc.12's type v1 plus the assignees field,
+link, mapping and contract version only, so an upgrade keeps every other setting
+a collection has. rc.15 (type v3) was regenerated from TaskNotes model defaults
+and also dropped the `cancelled` status and changed colours and profiles; it,
+and the superseded person-ID candidates rc.13 and rc.14, remain available at
+their immutable URLs but are not listed (`catalog: false`).
+
+Derive a new starter type from the previous one by the intended change, not by
+regenerating it: the upgrade tests check that nothing else changes.
 
 To regenerate from a built sibling model:
 
