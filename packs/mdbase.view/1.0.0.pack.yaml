@@ -1,0 +1,33 @@
+kind: mdbase.catalog-pack
+id: mdbase.view
+version: 1.0.0
+name: Saved views
+description: The mdbase.view contract and an editable View type for saved, reusable queries.
+display:
+  name: Saved views
+  summary: Save reusable queries that any view-aware app can list and run.
+  category: work
+  audience: general
+  icon: table
+  badges:
+    - Portable views
+installation:
+  visibility: default
+  recommendation: optional
+  primary_type: view
+provides:
+  - id: mdbase.view
+    version: 1.0.0
+resources:
+  - kind: schema
+    mode: managed
+    source: schemas/mdbase.view/1.0.0.schema.json
+    target: schemas/mdbase.view/1.0.0.schema.json
+  - kind: contract
+    mode: managed
+    source: contracts/mdbase.view/1.0.0.md
+    target: _contracts/mdbase.view/1.0.0.md
+  - kind: type
+    mode: seed
+    source: types/view/1.md
+    target: _types/view.md
