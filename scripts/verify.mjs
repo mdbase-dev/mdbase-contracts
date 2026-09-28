@@ -5,6 +5,7 @@ import { dirname, join, resolve } from "node:path";
 import { pathToFileURL, fileURLToPath } from "node:url";
 import Ajv2020 from "ajv/dist/2020.js";
 import addFormats from "ajv-formats";
+import { cliPackEngine } from "./cli-pack-engine.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const dist = join(root, "dist");
@@ -53,32 +54,31 @@ for (const pack of catalog.packs) {
   }
 
   const collectionRoot = await mkdtemp(join(tmpdir(), "mdbase-contract-catalog-"));
+  let engine;
   try {
     await writeFile(
       join(collectionRoot, "mdbase.yaml"),
       "spec_version: 0.3.0\nsettings:\n  validation: error\n",
     );
     const assessmentOptions = { installedBy: catalog.id };
-    const dryRun = await assessTypePack(collectionRoot, installProvision, assessmentOptions);
+    engine = process.env.MDBASE_VERIFY_CLI
+      ? await cliPackEngine(process.env.MDBASE_VERIFY_CLI, collectionRoot, installProvision, catalog.id)
+      : {
+        assess: () => assessTypePack(collectionRoot, installProvision, assessmentOptions),
+        apply: (digest) => applyTypePack(collectionRoot, installProvision, {
+          ...assessmentOptions, expectedAssessmentDigest: digest,
+        }),
+      };
+    const dryRun = await engine.assess();
     assertValid(dryRun, `${pack.id} dry run`);
     if (dryRun.result.resources.some(({ action }) => action !== "create")) {
       fail(`${pack.id} dry run did not plan only creates.`);
     }
 
-    assertValid(await applyTypePack(collectionRoot, installProvision, {
-      ...assessmentOptions,
-      expectedAssessmentDigest: dryRun.result.assessment_digest,
-    }), `${pack.id} install`);
-    const repeatedAssessment = await assessTypePack(
-      collectionRoot,
-      installProvision,
-      assessmentOptions,
-    );
+    assertValid(await engine.apply(dryRun.result.assessment_digest), `${pack.id} install`);
+    const repeatedAssessment = await engine.assess();
     assertValid(repeatedAssessment, `${pack.id} repeat assessment`);
-    const repeated = await applyTypePack(collectionRoot, installProvision, {
-      ...assessmentOptions,
-      expectedAssessmentDigest: repeatedAssessment.result.assessment_digest,
-    });
+    const repeated = await engine.apply(repeatedAssessment.result.assessment_digest);
     assertValid(repeated, `${pack.id} repeat install`);
     if (
       repeated.result.resources.some(
@@ -106,6 +106,7 @@ for (const pack of catalog.packs) {
       await opened.collection.close();
     }
   } finally {
+    await engine?.close?.();
     await rm(collectionRoot, { recursive: true, force: true });
   }
 }

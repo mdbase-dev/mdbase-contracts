@@ -1,0 +1,48 @@
+kind: mdbase.catalog-pack
+id: mdbase.contact
+version: 1.1.0
+name: People and contacts type pack
+description: Portable people, editable account identity associations, and familiar contact fields.
+display:
+  name: People and contacts
+  summary: Reference people across apps and collections without tying records to account membership.
+  category: people
+  audience: general
+  icon: user
+  badges:
+    - Portable person references
+installation:
+  visibility: hidden
+  recommendation: user
+  primary_type: contact
+expand_local_refs: true
+provides:
+  - id: mdbase.person
+    version: 1.0.0
+  - id: mdbase.contact
+    version: 1.0.0
+resources:
+  - kind: schema
+    mode: managed
+    source: schemas/mdbase.person/1.0.0.schema.json
+    target: schemas/mdbase.person/1.0.0.schema.json
+  - kind: contract
+    mode: managed
+    source: contracts/mdbase.person/1.0.0.md
+    target: _contracts/mdbase.person/1.0.0.md
+  - kind: schema
+    mode: managed
+    source: schemas/mdbase.contact/1.0.0.schema.json
+    target: schemas/mdbase.contact/1.0.0.schema.json
+  - kind: contract
+    mode: managed
+    source: contracts/mdbase.contact/1.0.0.md
+    target: _contracts/mdbase.contact/1.0.0.md
+  - kind: type
+    mode: seed
+    source: types/contact/2.md
+    target: _types/contact.md
+  - kind: type
+    mode: seed
+    source: types/person/1.md
+    target: _types/person.md

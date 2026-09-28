@@ -24,6 +24,22 @@ types, the four canonical record-change events, and inspectable timer-event
 and cancellation-action artifacts.
 Installing it is passive and grants no execution authority.
 
+The `mdbase.contact` 1.2.0 pack offers one **Person** starter with portable IDs,
+editable issuer/subject account associations, and optional contact details. It
+implements both `mdbase.person` and `mdbase.contact`, so apps use the same notes.
+The pack keeps the existing resource owner, but no longer adds a separate Contact
+type to fresh collections. Older Contact types, notes, and customized Person types
+are preserved; there is no automatic migration. Older pack artifacts remain
+byte-identical at their versioned paths, but only the current pack is offered in the
+catalog. Person starter v2 adds field-level descriptions and usage guidance without
+changing validation or contract mappings. Pack resources
+explicitly use `managed` for schemas/contracts and `seed` for editable starter
+types; install tests exercise the exact generated payload without supplying
+missing modes. Associations are ordinary collection data, never
+authentication or membership authority. See
+[`mdbase.person` 1.0.0](contracts/mdbase.person/1.0.0.md) for matching,
+ambiguity, privacy, and lifecycle semantics.
+
 The `tasknotes.task` pack is the canonical application-provisioned TaskNotes
 contract bundle. TaskNotes clients embed the published provision byte-for-byte
 and pin its catalog digest so independently deployed clients cannot drift onto
@@ -75,6 +91,43 @@ npm run expand:type -- types/example/1.md types/example/2.md
 Verification checks the catalog schema, every resource digest, a transactional
 dry run, a real install, idempotent reinstallation, and the declared contract
 implementations.
+
+The TaskNotes rc.14 candidate explicitly upgrades the rc.12 starter using a
+digest-pinned baseline. It requires an engine with seed-upgrade support; older
+engines reject it rather than silently skipping the upgrade. Published rc.12
+and rc.13 bytes remain unchanged. The rc.15 candidate upgrades the same rc.12
+starter to contract rc.5, where `assignees` are links to `mdbase.person` 2.0.0
+records declared in `collection.links`; Person 2.0.0 drops the separate `id`.
+The People pack 1.2.0 keeps shipping `mdbase.person` 1.0.0 so Person types
+customised under 1.1.0 continue to validate. To verify with the updated Rust
+engine:
+
+```sh
+MDBASE_VERIFY_CLI=/absolute/path/to/mdbase npm test
+```
+
+This runs dry-run/install/idempotency checks through that local CLI against
+throwaway collections, then reopens the installed definitions with mdbase-ts.
+It does not claim that older mdbase-ts versions can execute seed upgrades.
+
+## TaskNotes assignments
+
+The rc.15 TaskNotes pack introduces optional `assignees` through the rc.5 task
+contract and task type v3: links to records implementing `mdbase.person` 2.0.0,
+declared as links so engines resolve them. It upgrades collections that seeded
+rc.12's task type 1 with a digest-pinned seed-type upgrade, without rewriting
+published rc.3 resources. rc.13 and rc.14, the superseded person-ID candidates,
+remain available at their immutable URLs but are not listed (`catalog: false`).
+
+To regenerate from a built sibling model:
+
+```sh
+node scripts/sync-tasknotes-pack.mjs
+npm run build
+```
+
+The importer refuses to overwrite differing existing versioned artifacts.
+Publish this catalog before consumers request its new immutable URLs.
 
 ## Publishing
 
