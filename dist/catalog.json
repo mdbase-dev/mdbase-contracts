@@ -10,6 +10,16 @@
   },
   "contracts": [
     {
+      "id": "mdbase.comment",
+      "version": "1.0.0",
+      "name": "Comment",
+      "description": "Comments, replies and suggested edits anchored to text in Markdown records.",
+      "contract_type": "record",
+      "digest": "sha256:c85663fbb339d33e8e67825c81fc160fbac00285a1687cbe99187bad7f58878d",
+      "artifact": "./artifacts/contracts/mdbase.comment/1.0.0.md",
+      "standards": []
+    },
+    {
       "id": "mdbase.contact",
       "version": "1.0.0",
       "name": "Contact",
@@ -241,6 +251,44 @@
     }
   ],
   "packs": [
+    {
+      "id": "mdbase.comment",
+      "version": "1.0.0",
+      "name": "Comments type pack",
+      "description": "Comments, replies and suggested edits anchored to text in Markdown records.",
+      "digest": "sha256:37729ce8eca79ed52b669b191350056cbd23d2fe1453d38b56805979ce0d9e29",
+      "provision": "./packs/mdbase.comment/1.0.0.json",
+      "provides": [
+        {
+          "id": "mdbase.comment",
+          "version": "1.0.0",
+          "digest": "sha256:c2c5b3f3013d10625310401e9f9149ffa2d09c5b7d91b4fc97688d3ac010bec5"
+        }
+      ],
+      "resource_count": 3,
+      "display": {
+        "name": "Comments",
+        "summary": "Discuss and suggest edits to notes without changing their text, in any app that reads comments.",
+        "category": "work",
+        "audience": "general",
+        "icon": "chat-circle",
+        "badges": [
+          "Portable comments",
+          "Suggested edits"
+        ]
+      },
+      "installation": {
+        "visibility": "default",
+        "recommendation": "optional",
+        "primary_type": "comment",
+        "types": [
+          {
+            "name": "comment",
+            "label": "Comment"
+          }
+        ]
+      }
+    },
     {
       "id": "mdbase.contact",
       "version": "1.0.0",
