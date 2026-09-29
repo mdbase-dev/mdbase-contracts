@@ -1,0 +1,34 @@
+kind: mdbase.catalog-pack
+id: mdbase.comment
+version: 1.0.0
+name: Comments type pack
+description: Comments, replies and suggested edits anchored to text in Markdown records.
+display:
+  name: Comments
+  summary: Discuss and suggest edits to notes without changing their text, in any app that reads comments.
+  category: work
+  audience: general
+  icon: chat-circle
+  badges:
+    - Portable comments
+    - Suggested edits
+installation:
+  visibility: default
+  recommendation: optional
+  primary_type: comment
+provides:
+  - id: mdbase.comment
+    version: 1.0.0
+resources:
+  - kind: schema
+    mode: managed
+    source: schemas/mdbase.comment/1.0.0.schema.json
+    target: schemas/mdbase.comment/1.0.0.schema.json
+  - kind: contract
+    mode: managed
+    source: contracts/mdbase.comment/1.0.0.md
+    target: _contracts/mdbase.comment/1.0.0.md
+  - kind: type
+    mode: seed
+    source: types/comment/1.md
+    target: _types/comment.md

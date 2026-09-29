@@ -40,6 +40,11 @@ authentication or membership authority. See
 [`mdbase.person` 1.0.0](contracts/mdbase.person/1.0.0.md) for matching,
 ambiguity, privacy, and lifecycle semantics.
 
+The `mdbase.comment` pack defines comments, replies and suggested edits as
+records of their own, anchored to a quote of the commented record's Markdown
+body and linked to `mdbase.person` authors. Apps that comment embed the
+published provision unchanged, as mdbase writer does.
+
 The `tasknotes.task` pack is the canonical application-provisioned TaskNotes
 contract bundle. TaskNotes clients embed the published provision byte-for-byte
 and pin its catalog digest so independently deployed clients cannot drift onto
