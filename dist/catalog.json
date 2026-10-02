@@ -483,6 +483,48 @@
         ]
       },
       "installation": {
+        "visibility": "hidden",
+        "recommendation": "user",
+        "primary_type": "person",
+        "types": [
+          {
+            "name": "person",
+            "label": "Person"
+          }
+        ]
+      }
+    },
+    {
+      "id": "mdbase.contact",
+      "version": "1.4.0",
+      "name": "People type pack",
+      "description": "Portable people, editable account identity associations, and familiar contact fields.",
+      "digest": "sha256:741fcf0f50d13538eda1c9ee32df4d85e32549b8fb730350bb80b3323b09df93",
+      "provision": "./packs/mdbase.contact/1.4.0.json",
+      "provides": [
+        {
+          "id": "mdbase.person",
+          "version": "2.0.0",
+          "digest": "sha256:f16c462a1fd422f44ed055002f8476ec53c164107647fec782aeb74adeab2f9d"
+        },
+        {
+          "id": "mdbase.contact",
+          "version": "1.0.0",
+          "digest": "sha256:49cfe15403dfc741a693e89a2f4d2857de306f391d02cb03e67bfaf0aa1d6b0d"
+        }
+      ],
+      "resource_count": 7,
+      "display": {
+        "name": "People",
+        "summary": "Reference people across apps and collections without tying records to account membership.",
+        "category": "people",
+        "audience": "general",
+        "icon": "user",
+        "badges": [
+          "Portable person references"
+        ]
+      },
+      "installation": {
         "visibility": "default",
         "recommendation": "user",
         "primary_type": "person",
@@ -769,6 +811,44 @@
       "description": "Portable tasks whose assignments link to person records, with a reviewed, atomic starter upgrade that keeps each collection's generator bookkeeping.",
       "digest": "sha256:aa03bd096f62868b4b414e753cd01024d33d8cd193c902f3cb0f3526c3149e8e",
       "provision": "./packs/tasknotes.task/0.3.0-rc.17.json",
+      "provides": [
+        {
+          "id": "tasknotes.task",
+          "version": "0.3.0-rc.5",
+          "digest": "sha256:dde71d0d776aa0069ee627fe3c10b1a20f87ba36929a16790598ebfb4e8ebf04"
+        }
+      ],
+      "resource_count": 4,
+      "display": {
+        "name": "TaskNotes tasks",
+        "summary": "Manage portable Markdown tasks, assignments, dates, recurrence, reminders, and time tracking.",
+        "category": "work",
+        "audience": "general",
+        "icon": "square-check-big",
+        "badges": [
+          "TaskNotes compatible"
+        ]
+      },
+      "installation": {
+        "visibility": "hidden",
+        "recommendation": "integration-managed",
+        "primary_type": "task",
+        "caution": "Upgrades the previous starter type while preserving independent customizations. Conflicts or other references to the previous contract block the whole upgrade.",
+        "types": [
+          {
+            "name": "task",
+            "label": "Task"
+          }
+        ]
+      }
+    },
+    {
+      "id": "tasknotes.task",
+      "version": "0.3.0-rc.18",
+      "name": "TaskNotes task type pack",
+      "description": "Portable tasks whose assignments link to person records, with a reviewed, atomic upgrade from every TaskNotes starter published before.",
+      "digest": "sha256:9a9ebc26e6f63ad2fc3d92f87d38f6c140a3af90408de47d667ae7b9ba0dc9ef",
+      "provision": "./packs/tasknotes.task/0.3.0-rc.18.json",
       "provides": [
         {
           "id": "tasknotes.task",

@@ -8,7 +8,7 @@
     "build": "node scripts/build.mjs",
     "expand:type": "node scripts/expand-type.mjs",
     "verify": "node scripts/verify.mjs",
-    "test": "node --test scripts/schema-expansion.test.mjs scripts/person-contract.test.mjs scripts/comment-contract.test.mjs scripts/starter-type-keys.test.mjs && npm run build && npm run verify && node --test scripts/person-pack.test.mjs scripts/tasknotes-upgrade.test.mjs scripts/tasknotes-plugin-collections.test.mjs"
+    "test": "node --test scripts/schema-expansion.test.mjs scripts/person-contract.test.mjs scripts/comment-contract.test.mjs scripts/starter-type-keys.test.mjs && npm run build && npm run verify && node --test scripts/seed-baselines.test.mjs scripts/seed-upgrade.test.mjs scripts/person-pack.test.mjs scripts/tasknotes-upgrade.test.mjs scripts/tasknotes-plugin-collections.test.mjs"
   },
   "dependencies": {
     "ajv": "^8.20.0",

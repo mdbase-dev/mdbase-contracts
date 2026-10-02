@@ -28,6 +28,8 @@ const targets = [
   // rc.17 also leaves the collection's generator bookkeeping alone, which
   // follows its field mapping (rc.16 conflicted with a customized list).
   { pack: "0.3.0-rc.17", contract: /0\.3\.0-rc\.5/, links: /assignees\[\]:/, minimal: true, customMapping: true },
+  // rc.18 ships rc.17's starter and lists every earlier starter as a baseline.
+  { pack: "0.3.0-rc.18", contract: /0\.3\.0-rc\.5/, links: /assignees\[\]:/, minimal: true, customMapping: true },
 ];
 
 // Everything an upgrade may change in the starter type: assignees and versions.
@@ -42,7 +44,7 @@ function withoutAssignees(document) {
   type["x-tasknotes-generator"].managed_fields = type["x-tasknotes-generator"].managed_fields.filter((field) => field !== "assignees");
   return type;
 }
-for (const target of targets) for (const scenario of ["managed", "customized", "generator-defaults", "custom-mapping", "unmanaged", "conflict", "other-reference"]) {
+for (const target of targets) for (const scenario of ["managed", "customized", "customized-without-origin", "generator-defaults", "custom-mapping", "unmanaged", "conflict", "other-reference"]) {
   if (scenario === "generator-defaults" && !target.minimal) continue;
   if (scenario === "custom-mapping" && !target.customMapping) continue;
   test(`TaskNotes rc.12 to ${target.pack} upgrade: ${scenario}`, async () => {
@@ -59,7 +61,7 @@ for (const target of targets) for (const scenario of ["managed", "customized", "
       assert.equal((await reviewedInstall(await engine(old))).valid, true);
       const typePath = join(root, "_types/task.md");
       const oldType = await readFile(typePath, "utf8");
-      if (scenario === "customized") {
+      if (scenario === "customized" || scenario === "customized-without-origin") {
         const type = parse(oldType.slice(4, oldType.indexOf("\n---", 4)));
         type.schema.value.properties.heading = type.schema.value.properties.title;
         delete type.schema.value.properties.title;
@@ -79,6 +81,13 @@ for (const target of targets) for (const scenario of ["managed", "customized", "
       if (scenario === "conflict") await writeFile(typePath, oldType.replace("version: 1\n", "version: 99\n"));
       if (scenario === "other-reference") await writeFile(join(root, "_types/other.md"), oldType.replace("name: task", "name: other"));
       if (scenario === "unmanaged") await rm(join(root, "mdbase.lock.yaml"));
+      if (scenario === "customized-without-origin") {
+        // Engines before mdbase spec 05A recorded no seed origin in the lock.
+        const lockPath = join(root, "mdbase.lock.yaml");
+        const lock = parse(await readFile(lockPath, "utf8"));
+        for (const pack of lock.packs) for (const resource of pack.resources) delete resource.origin_digest;
+        await writeFile(lockPath, stringify(lock));
+      }
       const task = "---\ntype: task\ntitle: Keep\nheading: Keep\n---\nOriginal body.\n";
       await writeFile(join(root, "task.md"), task);
       const paths = old.manifest.resources.map((r) => r.target);
@@ -90,8 +99,15 @@ for (const target of targets) for (const scenario of ["managed", "customized", "
         for (const [path, document] of before) assert.equal(await readFile(join(root, path), "utf8"), document);
       }
       const result = await reviewedInstall(await engine(await load(target.pack)));
-      const success = !["conflict", "other-reference"].includes(scenario);
+      // An edited seed with no recorded origin (locks written before mdbase spec
+      // 05A) is never merged against a guessed baseline. It is preserved, and as
+      // it still requires the replaced contract the whole upgrade is blocked,
+      // exactly as for any other reference to that contract.
+      const success = !["conflict", "other-reference", "customized-without-origin"].includes(scenario);
       assert.equal(result.valid, success, JSON.stringify(result));
+      if (scenario === "customized-without-origin") {
+        assert.match(JSON.stringify(result.diagnostics), /tasknotes\.task.{1,4}0\.3\.0-rc\.3/);
+      }
       assert.equal(await readFile(join(root, "task.md"), "utf8"), task);
       if (!success) {
         for (const [path, document] of before) assert.equal(await readFile(join(root, path), "utf8"), document);

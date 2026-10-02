@@ -39,7 +39,8 @@ collections where `type` is data). Person v3, Comment v2 and View v2 therefore n
 longer require or pin `type`, and View v2 accepts unknown top-level fields; each
 keeps its `match` rule for hand-written records. `mdbase.contact` 1.3.0,
 `mdbase.comment` 1.0.1 and `mdbase.view` 1.0.1 offer them as reviewed upgrades of
-the unmodified previous starter. Pack resources
+the unmodified previous starter; `mdbase.contact` 1.4.0 upgrades both earlier
+Person starters (v1 from 1.1.0 and v2 from 1.2.0) to v3. Pack resources
 explicitly use `managed` for schemas/contracts and `seed` for editable starter
 types; install tests exercise the exact generated payload without supplying
 missing modes. Associations are ordinary collection data, never
@@ -85,7 +86,7 @@ MDBASE_SPEC_DIR=../mdbase-spec npm run sync:runtime
 
 Requires Node.js 22+ and a built checkout of
 [`@callumalpass/mdbase`](https://github.com/callumalpass/mdbase) (mdbase-ts)
-0.3.0-rc.8 or later. A sibling `../mdbase` checkout is used by default; set
+0.3.0-rc.9 or later (seed upgrade baseline lists). A sibling `../mdbase` checkout is used by default; set
 `MDBASE_TS_DIR` to override it. CI checks out and builds the tag pinned in
 `sources.json` (`typescript_implementation.ref`), which is the single source
 of truth for the mdbase-ts version the catalog is verified against.
@@ -127,7 +128,48 @@ MDBASE_VERIFY_CLI=/absolute/path/to/mdbase npm test
 
 Installed collections are reopened with mdbase-ts either way. CI runs
 `npm test` once per engine, with the CLI built from the commits pinned in
-`sources.json` (`rust_cli`).
+`sources.json` (`rust_cli`). The CLI's engine must include mdbase-rs 056db73
+(seed upgrade baseline lists); `rust_cli.ref` is the mdbase-connect commit that
+pins that engine revision.
+
+## Seed upgrade baselines
+
+A seed type is the collection's to edit once installed, so a new pack version
+replaces it only through an explicit seed-type upgrade (mdbase spec 05A). A pack
+definition names the starters it upgrades with `upgrade_from`, either one path
+or a list:
+
+```yaml
+  - kind: type
+    mode: seed
+    source: types/tasknotes-task/5.md
+    target: _types/task.md
+    upgrade_from:
+      - types/tasknotes-task/4.md
+      - types/tasknotes-task/3.md
+      - types/tasknotes-task/2.md
+      - types/tasknotes-task/1.md
+```
+
+`npm run build` emits a list as `[{ digest, version, document }]`, ordered
+newest first, with `version` read from each baseline's frontmatter; the single
+form keeps emitting one `{ digest, document }` so published packs stay
+byte-identical. The build rejects baselines on anything but a seed type,
+duplicate or self baselines, and baselines whose type `kind` or `name` differs
+from the desired starter.
+
+Engines replace a starter equal to any listed baseline with the exact new
+starter, and merge an edited starter only against the baseline its lock records
+as its `origin_digest`; an edited type with no recorded origin (installed by an
+engine before 05A) or an unlisted origin is preserved with a reason. An
+unlisted starter is therefore never upgraded, so the catalog keeps an
+invariant, checked by `scripts/seed-baselines.test.mjs`: for every offered
+(non-hidden) pack and seed target, `upgrade_from` lists every starter that any
+earlier version of the pack shipped at that target, including unlisted
+(`catalog: false`) versions. When a pack's list changes, publish a new version
+and hide the previous one (`installation.visibility: hidden`).
+`scripts/seed-upgrade.test.mjs` installs each earlier version through the
+selected engine and upgrades it, unedited and customised.
 
 ## TaskNotes assignments
 
@@ -146,6 +188,13 @@ rc.17's starter is rc.16's with the generator bookkeeping
 (`x-tasknotes-generator.managed_fields`) left as rc.12 published it: each
 collection's list follows its own field mapping, so an upgrade that changed it
 conflicted wherever that mapping was customized. rc.16 is not listed.
+
+rc.18 ships rc.17's starter unchanged and lists every earlier starter as an
+upgrade baseline (revisions 4, 3, 2 and 1, from rc.16, rc.15, rc.13/rc.14 and
+rc.12), so a collection seeded by any earlier pack upgrades to it. rc.17 is
+hidden. A customised task type whose lock records no origin is preserved, and
+because it still implements the replaced contract the upgrade is blocked for
+review rather than merged against a guessed starter.
 
 Starter files are named by revision (`types/tasknotes-task/<revision>.md`); a
 revision that does not change the task data keeps the type `version`, so

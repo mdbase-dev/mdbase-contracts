@@ -9,7 +9,7 @@ import { packEngine } from "./pack-engine.mjs";
 // TaskNotes 4.13.6 and the 5.0 betas, with default and customized settings).
 // Every TaskNotes pack must install over them, as TaskNotes App does through
 // Connect, without conflicts and without dropping statuses or touching records.
-const LATEST = "0.3.0-rc.17";
+const LATEST = "0.3.0-rc.18";
 const fixtures = new URL("./fixtures/tasknotes-5.0/", import.meta.url);
 
 async function reviewedInstall(engine) {
@@ -40,6 +40,21 @@ for (const name of (await readdir(fixtures)).filter((file) => file.endsWith(".js
       const result = await reviewedInstall(engine);
       assert.equal(result.valid, true, JSON.stringify(result));
       const type = await readFile(join(root, "_types/task.md"), "utf8");
+      // These collections have no lock, so no recorded seed origin: a task type
+      // equal to a published starter is replaced with the new starter, and any
+      // other is the collection's own and is preserved with a reason, never
+      // merged against a guessed baseline (mdbase spec 05A).
+      const seed = provision.manifest.resources.find(({ target }) => target === "_types/task.md");
+      const planned = result.result.resources.find(({ target }) => target === "_types/task.md");
+      const starter = seed.upgrade_from.find(({ document }) => document === files["_types/task.md"]);
+      if (starter) {
+        assert.equal(planned.action, "update");
+        assert.equal(type, provision.resources.find(({ source }) => source === seed.source).document);
+      } else {
+        assert.equal(planned.action, "preserve");
+        assert.match(planned.reason, /no upgrade baseline applies/);
+        assert.equal(type, files["_types/task.md"]);
+      }
       if (files["_types/task.md"].includes("- cancelled")) assert.match(type, /- cancelled/);
       assert.match(type, /version: 0\.3\.0-rc\.5/);
       for (const path of Object.keys(files).filter((path) => !path.startsWith("_") && !path.startsWith("mdbase"))) {
