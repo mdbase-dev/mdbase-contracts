@@ -84,8 +84,11 @@ MDBASE_SPEC_DIR=../mdbase-spec npm run sync:runtime
 ## Build and verify
 
 Requires Node.js 22+ and a built checkout of
-[`@callumalpass/mdbase`](https://github.com/callumalpass/mdbase). A sibling
-`../mdbase` checkout is used by default; set `MDBASE_TS_DIR` to override it.
+[`@callumalpass/mdbase`](https://github.com/callumalpass/mdbase) (mdbase-ts)
+0.3.0-rc.8 or later. A sibling `../mdbase` checkout is used by default; set
+`MDBASE_TS_DIR` to override it. CI checks out and builds the tag pinned in
+`sources.json` (`typescript_implementation.ref`), which is the single source
+of truth for the mdbase-ts version the catalog is verified against.
 
 ```sh
 npm install
@@ -111,16 +114,20 @@ and rc.13 bytes remain unchanged. The rc.15 candidate upgrades the same rc.12
 starter to contract rc.5, where `assignees` are links to `mdbase.person` 2.0.0
 records declared in `collection.links`; Person 2.0.0 drops the separate `id`.
 The People pack 1.2.0 keeps shipping `mdbase.person` 1.0.0 so Person types
-customised under 1.1.0 continue to validate. To verify with the updated Rust
-engine:
+customised under 1.1.0 continue to validate.
+
+Packs are installed through one of two engines. By default every check
+(catalog verification, the People pack tests, and the TaskNotes upgrade and
+plugin-collection tests) installs through mdbase-ts. To run the same checks
+through a Rust-engine mdbase CLI instead:
 
 ```sh
 MDBASE_VERIFY_CLI=/absolute/path/to/mdbase npm test
 ```
 
-This runs dry-run/install/idempotency checks through that local CLI against
-throwaway collections, then reopens the installed definitions with mdbase-ts.
-It does not claim that older mdbase-ts versions can execute seed upgrades.
+Installed collections are reopened with mdbase-ts either way. CI runs
+`npm test` once per engine, with the CLI built from the commits pinned in
+`sources.json` (`rust_cli`).
 
 ## TaskNotes assignments
 

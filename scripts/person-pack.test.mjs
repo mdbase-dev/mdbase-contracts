@@ -1,17 +1,14 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { cliPackEngine } from "./cli-pack-engine.mjs";
+import { mdbase, packEngine } from "./pack-engine.mjs";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join, resolve } from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import test from "node:test";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
-const mdbaseDir = resolve(process.env.MDBASE_TS_DIR ?? join(root, "..", "mdbase"));
-const { Collection, applyTypePack, assessTypePack } = await import(
-  pathToFileURL(join(mdbaseDir, "dist/index.js")).href
-);
+const { Collection } = mdbase;
 
 test("the catalog offers only the single-type People starter", async () => {
   const catalog = JSON.parse(await readFile(join(root, "dist/catalog.json"), "utf8"));
@@ -54,17 +51,9 @@ async function install(collectionRoot, version) {
       })),
     },
   };
-  const options = { installedBy: "dev.mdbase.first-party" };
-  if (process.env.MDBASE_VERIFY_CLI) {
-    const engine = await cliPackEngine(process.env.MDBASE_VERIFY_CLI, collectionRoot, input, options.installedBy);
-    try { const assessment = valid(await engine.assess()); valid(await engine.apply(assessment.assessment_digest)); }
-    finally { await engine.close(); }
-  } else {
-    const assessment = valid(await assessTypePack(collectionRoot, input, options));
-    valid(await applyTypePack(collectionRoot, input, {
-      ...options, expectedAssessmentDigest: assessment.assessment_digest,
-    }));
-  }
+  const engine = await packEngine(collectionRoot, input, "dev.mdbase.first-party");
+  try { const assessment = valid(await engine.assess()); valid(await engine.apply(assessment.assessment_digest)); }
+  finally { await engine.close(); }
 }
 
 // 1.2.0 and 1.3.0 offer only the Person starter; 1.3.0 upgrades an unmodified v2 to v3.
@@ -139,14 +128,14 @@ for (const versions of [["1.1.0"], ["1.0.0", "1.1.0"], ["1.2.0"], ["1.0.0", "1.2
         }));
         const converted = valid(await operations.update({
           path: "contacts/existing.md", if_revision: String(contact.revision),
-          fields: { type: "person", identities: [{ issuer: "https://connect.example", subject: "existing_account" }] },
+          patch: { type: "person", identities: [{ issuer: "https://connect.example", subject: "existing_account" }] },
         }));
         assert.equal(converted.frontmatter.id, "contact_existing");
         assert.equal(converted.frontmatter.name, "Existing contact");
         assert.equal(converted.frontmatter.email, "local@example.com");
         assert.equal(converted.frontmatter.private_notes, "Collection-owned data");
         assert.match(await readFile(join(collectionRoot, "contacts/existing.md"), "utf8"), /Keep this \*\*Markdown\*\* body\./);
-        const stale = await operations.update({ path: "contacts/existing.md", if_revision: String(contact.revision), fields: { name: "Stale overwrite" } });
+        const stale = await operations.update({ path: "contacts/existing.md", if_revision: String(contact.revision), patch: { name: "Stale overwrite" } });
         assert.equal(stale.valid, false, "conversion must not bypass revision checks");
       }
     } finally {

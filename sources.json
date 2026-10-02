@@ -5,9 +5,9 @@
   },
   "typescript_implementation": {
     "repository": "callumalpass/mdbase",
-    "ref": "3c9c89b8000b925d6e584cce4e06c610ce42fd5d"
+    "ref": "v0.3.0-rc.8"
   },
-  "seed_upgrade_cli": {
+  "rust_cli": {
     "repository": "mdbase-dev/mdbase-connect",
     "ref": "62242c21e754d27fee068e32ace02408bb572906",
     "engine_repository": "callumalpass/mdbase-rs",

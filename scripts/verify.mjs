@@ -2,10 +2,10 @@ import { createHash } from "node:crypto";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
-import { pathToFileURL, fileURLToPath } from "node:url";
+import { fileURLToPath } from "node:url";
 import Ajv2020 from "ajv/dist/2020.js";
 import addFormats from "ajv-formats";
-import { cliPackEngine } from "./cli-pack-engine.mjs";
+import { mdbase, packEngine, packEngineName } from "./pack-engine.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const dist = join(root, "dist");
@@ -20,11 +20,7 @@ if (!ajv.validate(catalogSchema, catalog)) {
   fail(`Catalog is invalid:\n${ajv.errorsText(ajv.errors, { separator: "\n" })}`);
 }
 
-const mdbaseDir = resolve(process.env.MDBASE_TS_DIR ?? join(root, "..", "mdbase"));
-const mdbaseEntry = join(mdbaseDir, "dist", "index.js");
-const { Collection, applyTypePack, assessTypePack } = await import(
-  pathToFileURL(mdbaseEntry).href
-);
+const { Collection } = mdbase;
 
 for (const contract of catalog.contracts) {
   const artifact = await readCatalogArtifact(contract.artifact);
@@ -60,15 +56,7 @@ for (const pack of catalog.packs) {
       join(collectionRoot, "mdbase.yaml"),
       "spec_version: 0.3.0\nsettings:\n  validation: error\n",
     );
-    const assessmentOptions = { installedBy: catalog.id };
-    engine = process.env.MDBASE_VERIFY_CLI
-      ? await cliPackEngine(process.env.MDBASE_VERIFY_CLI, collectionRoot, installProvision, catalog.id)
-      : {
-        assess: () => assessTypePack(collectionRoot, installProvision, assessmentOptions),
-        apply: (digest) => applyTypePack(collectionRoot, installProvision, {
-          ...assessmentOptions, expectedAssessmentDigest: digest,
-        }),
-      };
+    engine = await packEngine(collectionRoot, installProvision, catalog.id);
     const dryRun = await engine.assess();
     assertValid(dryRun, `${pack.id} dry run`);
     if (dryRun.result.resources.some(({ action }) => action !== "create")) {
@@ -111,7 +99,7 @@ for (const pack of catalog.packs) {
   }
 }
 
-console.log(`Verified ${catalog.contracts.length} contract and ${catalog.packs.length} pack.`);
+console.log(`Verified ${catalog.contracts.length} contract and ${catalog.packs.length} pack installs with ${packEngineName}.`);
 
 async function readCatalogArtifact(relativeUrl) {
   if (typeof relativeUrl !== "string" || !relativeUrl.startsWith("./")) {

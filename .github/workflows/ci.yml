@@ -11,7 +11,14 @@ permissions:
 
 jobs:
   verify:
+    name: verify (${{ matrix.engine }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # Every pack is installed, upgraded, and tested through both engines.
+        # mdbase-ts also reopens installed collections in both legs.
+        engine: [mdbase-ts, mdbase-cli]
     steps:
       - name: Check out contracts
         uses: actions/checkout@v7
@@ -21,10 +28,10 @@ jobs:
         run: |
           echo "repository=$(jq -r '.typescript_implementation.repository' sources.json)" >> "$GITHUB_OUTPUT"
           echo "ref=$(jq -r '.typescript_implementation.ref' sources.json)" >> "$GITHUB_OUTPUT"
-          echo "cli_repository=$(jq -r '.seed_upgrade_cli.repository' sources.json)" >> "$GITHUB_OUTPUT"
-          echo "cli_ref=$(jq -r '.seed_upgrade_cli.ref' sources.json)" >> "$GITHUB_OUTPUT"
-          echo "engine_repository=$(jq -r '.seed_upgrade_cli.engine_repository' sources.json)" >> "$GITHUB_OUTPUT"
-          echo "engine_ref=$(jq -r '.seed_upgrade_cli.engine_ref' sources.json)" >> "$GITHUB_OUTPUT"
+          echo "cli_repository=$(jq -r '.rust_cli.repository' sources.json)" >> "$GITHUB_OUTPUT"
+          echo "cli_ref=$(jq -r '.rust_cli.ref' sources.json)" >> "$GITHUB_OUTPUT"
+          echo "engine_repository=$(jq -r '.rust_cli.engine_repository' sources.json)" >> "$GITHUB_OUTPUT"
+          echo "engine_ref=$(jq -r '.rust_cli.engine_ref' sources.json)" >> "$GITHUB_OUTPUT"
 
       - name: Check out TypeScript implementation
         uses: actions/checkout@v7
@@ -33,9 +40,8 @@ jobs:
           ref: ${{ steps.sources.outputs.ref }}
           path: .sources/mdbase
 
-      # mdbase-ts cannot execute seed-type upgrades, so installs are verified
-      # through an mdbase CLI built on the Rust engine that can.
       - name: Check out mdbase CLI
+        if: matrix.engine == 'mdbase-cli'
         uses: actions/checkout@v7
         with:
           repository: ${{ steps.sources.outputs.cli_repository }}
@@ -43,6 +49,7 @@ jobs:
           path: .sources/cli/mdbase-connect
 
       - name: Check out its Rust engine
+        if: matrix.engine == 'mdbase-cli'
         uses: actions/checkout@v7
         with:
           repository: ${{ steps.sources.outputs.engine_repository }}
@@ -50,12 +57,16 @@ jobs:
           path: .sources/cli/mdbase-rs
 
       - uses: Swatinem/rust-cache@v2
+        if: matrix.engine == 'mdbase-cli'
         with:
           workspaces: .sources/cli/mdbase-connect
 
       - name: Build mdbase CLI
+        if: matrix.engine == 'mdbase-cli'
         working-directory: .sources/cli/mdbase-connect
-        run: cargo build --locked -p mdbase-cli --bin mdbase
+        run: |
+          cargo build --locked -p mdbase-cli --bin mdbase
+          echo "MDBASE_VERIFY_CLI=$PWD/target/debug/mdbase" >> "$GITHUB_ENV"
 
       - uses: actions/setup-node@v7
         with:
@@ -67,14 +78,14 @@ jobs:
 
       - name: Build TypeScript implementation
         working-directory: .sources/mdbase
-        run: npm ci && npm run build
+        run: |
+          npm ci && npm run build
+          echo "mdbase-ts $(jq -r .version package.json) at $(git rev-parse HEAD)"
 
-      - name: Build and verify catalog
+      - name: Build and verify catalog with ${{ matrix.engine }}
         run: npm test
         env:
           MDBASE_TS_DIR: .sources/mdbase
-          MDBASE_VERIFY_CLI: ${{ github.workspace }}/.sources/cli/mdbase-connect/target/debug/mdbase
 
       - name: Check deterministic publication output
         run: git diff --exit-code -- dist
-
