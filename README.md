@@ -32,7 +32,14 @@ type to fresh collections. Older Contact types, notes, and customized Person typ
 are preserved; there is no automatic migration. Older pack artifacts remain
 byte-identical at their versioned paths, but only the current pack is offered in the
 catalog. Person starter v2 adds field-level descriptions and usage guidance without
-changing validation or contract mappings. Pack resources
+changing validation or contract mappings. Starter types leave the type key to the collection:
+apps name a type when they create a record and the engine records it under the
+collection's configured `explicit_type_keys` (`type` by default, `mdbase_type` in
+collections where `type` is data). Person v3, Comment v2 and View v2 therefore no
+longer require or pin `type`, and View v2 accepts unknown top-level fields; each
+keeps its `match` rule for hand-written records. `mdbase.contact` 1.3.0,
+`mdbase.comment` 1.0.1 and `mdbase.view` 1.0.1 offer them as reviewed upgrades of
+the unmodified previous starter. Pack resources
 explicitly use `managed` for schemas/contracts and `seed` for editable starter
 types; install tests exercise the exact generated payload without supplying
 missing modes. Associations are ordinary collection data, never
