@@ -1,6 +1,6 @@
 kind: mdbase.catalog-pack
 id: mdbase.contact
-version: 1.2.0
+version: 1.3.0
 name: People type pack
 description: Portable people, editable account identity associations, and familiar contact fields.
 display:
@@ -12,7 +12,7 @@ display:
   badges:
     - Portable person references
 installation:
-  visibility: hidden
+  visibility: default
   recommendation: user
   primary_type: person
 expand_local_refs: true
@@ -50,5 +50,6 @@ resources:
     target: _contracts/mdbase.contact/1.0.0.md
   - kind: type
     mode: seed
-    source: types/person/2.md
+    source: types/person/3.md
     target: _types/person.md
+    upgrade_from: types/person/2.md

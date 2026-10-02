@@ -9,7 +9,7 @@ const root = new URL("../", import.meta.url);
 const commentSchema = JSON.parse(await readFile(new URL(
   "schemas/mdbase.comment/1.0.0.schema.json", root,
 ), "utf8"));
-const starter = matter(await readFile(new URL("types/comment/1.md", root), "utf8")).data;
+const starter = matter(await readFile(new URL("types/comment/2.md", root), "utf8")).data;
 const ajv = new Ajv2020({ allErrors: true, strict: true });
 addFormats(ajv);
 const validateComment = ajv.compile(commentSchema);
@@ -84,7 +84,9 @@ test("a target always quotes its text", () => {
 test("the contract view is closed; the starter type is open", () => {
   invalid(validateComment, { ...thread, colour: "yellow" });
   valid(validateStarter, { type: "comment", ...thread, colour: "yellow" });
-  invalid(validateStarter, thread);
+  // Whatever key the collection records the type under is just another open field.
+  valid(validateStarter, thread);
+  valid(validateStarter, { mdbase_type: "comment", ...thread });
 });
 
 test("the starter maps every contract field to itself and links every reference", () => {
@@ -98,9 +100,11 @@ test("the starter maps every contract field to itself and links every reference"
   }
 });
 
-test("the starter's schema is the contract's, plus the type key", () => {
-  const { type, ...properties } = starter.schema.value.properties;
-  assert.deepEqual(type, { const: "comment", description: type.description });
-  assert.deepEqual(properties, commentSchema.properties);
+// The collection's explicit type key (`type`, `mdbase_type`, ...) is configuration, not
+// part of the comment, so the starter neither requires nor pins it.
+test("the starter's schema is the contract's", () => {
+  assert.equal(starter.schema.value.properties.type, undefined);
+  assert.ok(!starter.schema.value.required.includes("type"));
+  assert.deepEqual(starter.schema.value.properties, commentSchema.properties);
   assert.deepEqual(starter.schema.value.allOf, commentSchema.allOf);
 });

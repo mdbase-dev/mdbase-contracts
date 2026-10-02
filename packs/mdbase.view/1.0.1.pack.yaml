@@ -1,6 +1,6 @@
 kind: mdbase.catalog-pack
 id: mdbase.view
-version: 1.0.0
+version: 1.0.1
 name: Saved views
 description: The mdbase.view contract and an editable View type for saved, reusable queries.
 display:
@@ -12,7 +12,7 @@ display:
   badges:
     - Portable views
 installation:
-  visibility: hidden
+  visibility: default
   recommendation: optional
   primary_type: view
 provides:
@@ -29,5 +29,6 @@ resources:
     target: _contracts/mdbase.view/1.0.0.md
   - kind: type
     mode: seed
-    source: types/view/1.md
+    source: types/view/2.md
     target: _types/view.md
+    upgrade_from: types/view/1.md
