@@ -3,14 +3,13 @@ import { test } from "node:test";
 import { mkdir, mkdtemp, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { tmpdir } from "node:os";
-import { cliPackEngine } from "./cli-pack-engine.mjs";
+import { packEngine } from "./pack-engine.mjs";
 
 // Collections exactly as the TaskNotes 5.0 plugin writes them (upgraded from
 // TaskNotes 4.13.6 and the 5.0 betas, with default and customized settings).
 // Every TaskNotes pack must install over them, as TaskNotes App does through
 // Connect, without conflicts and without dropping statuses or touching records.
 const LATEST = "0.3.0-rc.17";
-const command = process.env.MDBASE_VERIFY_CLI;
 const fixtures = new URL("./fixtures/tasknotes-5.0/", import.meta.url);
 
 async function reviewedInstall(engine) {
@@ -27,7 +26,7 @@ async function reviewedInstall(engine) {
 }
 
 for (const name of (await readdir(fixtures)).filter((file) => file.endsWith(".json")).sort()) {
-  test(`TaskNotes ${LATEST} installs over a TaskNotes 5.0 plugin collection: ${name}`, { skip: !command }, async () => {
+  test(`TaskNotes ${LATEST} installs over a TaskNotes 5.0 plugin collection: ${name}`, async () => {
     const { files } = JSON.parse(await readFile(new URL(name, fixtures), "utf8"));
     const root = await mkdtemp(join(tmpdir(), "tasknotes-plugin-collection-"));
     let engine;
@@ -37,7 +36,7 @@ for (const name of (await readdir(fixtures)).filter((file) => file.endsWith(".js
         await writeFile(join(root, path), document);
       }
       const provision = JSON.parse(await readFile(new URL(`../dist/packs/tasknotes.task/${LATEST}.json`, import.meta.url), "utf8"));
-      engine = await cliPackEngine(command, root, provision, "dev.mdbase.tests");
+      engine = await packEngine(root, provision, "dev.mdbase.tests");
       const result = await reviewedInstall(engine);
       assert.equal(result.valid, true, JSON.stringify(result));
       const type = await readFile(join(root, "_types/task.md"), "utf8");

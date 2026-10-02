@@ -4,9 +4,8 @@ import { readFile, writeFile, mkdtemp, rm } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { parse, stringify } from "yaml";
-import { cliPackEngine } from "./cli-pack-engine.mjs";
+import { packEngine } from "./pack-engine.mjs";
 
-const command = process.env.MDBASE_VERIFY_CLI;
 const load = async (version) => JSON.parse(await readFile(new URL(`../dist/packs/tasknotes.task/${version}.json`, import.meta.url), "utf8"));
 async function reviewedInstall(engine) {
   let assessment = await engine.assess();
@@ -46,14 +45,14 @@ function withoutAssignees(document) {
 for (const target of targets) for (const scenario of ["managed", "customized", "generator-defaults", "custom-mapping", "unmanaged", "conflict", "other-reference"]) {
   if (scenario === "generator-defaults" && !target.minimal) continue;
   if (scenario === "custom-mapping" && !target.customMapping) continue;
-  test(`TaskNotes rc.12 to ${target.pack} upgrade: ${scenario}`, { skip: !command }, async () => {
+  test(`TaskNotes rc.12 to ${target.pack} upgrade: ${scenario}`, async () => {
     const root = await mkdtemp(join(tmpdir(), "tasknotes-upgrade-test-"));
     const engines = [];
     try {
       await writeFile(join(root, "mdbase.yaml"), "spec_version: 0.3.0\nsettings:\n  validation: error\n");
       const old = await load("0.3.0-rc.12");
       async function engine(provision) {
-        const value = await cliPackEngine(command, root, provision, "dev.mdbase.tests");
+        const value = await packEngine(root, provision, "dev.mdbase.tests");
         engines.push(value);
         return value;
       }

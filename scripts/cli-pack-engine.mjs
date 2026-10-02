@@ -7,7 +7,7 @@ function adoptionArgs(adoptions) {
   return Object.entries(adoptions).flatMap(([target, digest]) => ["--adopt", `${target}=${digest}`]);
 }
 
-/** Explicit CLI backend for engine features not yet available in mdbase-ts. */
+/** Installs packs through the Rust-engine mdbase CLI (`mdbase packs assess|apply`). */
 export async function cliPackEngine(command, collectionRoot, provision, installedBy) {
   const bundle = await mkdtemp(join(tmpdir(), "mdbase-catalog-pack-"));
   const close = () => rm(bundle, { recursive: true, force: true });
