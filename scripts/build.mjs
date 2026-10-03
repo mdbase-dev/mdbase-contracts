@@ -46,18 +46,9 @@ for (const packFile of packFiles) {
     assertInside(root, sourcePath, "resource source");
     const document = await readFile(sourcePath, "utf8");
     const resourceDigest = digest(document);
-    let upgradeFrom;
-    if (resource.upgrade_from !== undefined) {
-      if (resource.kind !== "type" || resource.mode !== "seed") {
-        fail("Only seed types may declare an upgrade baseline.");
-      }
-      assertSafePath(resource.upgrade_from, "upgrade baseline");
-      const baselinePath = resolve(root, resource.upgrade_from);
-      assertInside(root, baselinePath, "upgrade baseline");
-      const baseline = await readFile(baselinePath, "utf8");
-      upgradeFrom = { digest: digest(baseline), document: baseline };
-    }
-
+    const upgradeFrom = resource.upgrade_from === undefined
+      ? undefined
+      : await upgradeBaselines(resource, document, resourceDigest, relative(root, packFile));
     resources.push({ source: resource.source, document });
     manifestResources.push({
       kind: resource.kind,
@@ -173,6 +164,49 @@ for (const version of [1, 2]) {
 console.log(
   `Built ${catalog.contracts.length} contract and ${catalog.packs.length} pack into ${relative(root, dist)}.`,
 );
+
+/**
+ * A seed type's upgrade baselines (mdbase spec 05A). The single-path form
+ * keeps emitting one `{ digest, document }` baseline, so published packs stay
+ * byte-identical; a list emits `[{ digest, version, document }]`, newest first.
+ */
+async function upgradeBaselines(resource, desired, desiredDigest, label) {
+  const at = `${label} ${resource.target} upgrade_from`;
+  if (resource.kind !== "type" || resource.mode !== "seed") {
+    fail(`${at}: only seed types may declare an upgrade baseline.`);
+  }
+  const list = Array.isArray(resource.upgrade_from);
+  const paths = list ? resource.upgrade_from : [resource.upgrade_from];
+  if (paths.length === 0) fail(`${at}: a baseline list must not be empty.`);
+  const desiredType = matter(desired).data;
+  const seen = new Set();
+  const baselines = [];
+  for (const path of paths) {
+    assertSafePath(path, "upgrade baseline");
+    const baselinePath = resolve(root, path);
+    assertInside(root, baselinePath, "upgrade baseline");
+    const document = await readFile(baselinePath, "utf8");
+    const baselineDigest = digest(document);
+    if (baselineDigest === desiredDigest) fail(`${at}: ${path} is the resource's own document.`);
+    if (seen.has(baselineDigest)) fail(`${at}: ${path} repeats an earlier baseline.`);
+    seen.add(baselineDigest);
+    const frontmatter = matter(document).data;
+    if (frontmatter.kind !== desiredType.kind || frontmatter.name !== desiredType.name) {
+      fail(`${at}: ${path} must have the same type kind and name as ${resource.source}.`);
+    }
+    if (frontmatter.version !== undefined && !Number.isInteger(frontmatter.version)) {
+      fail(`${at}: ${path} must declare an integer type version.`);
+    }
+    baselines.push({
+      digest: baselineDigest,
+      ...(frontmatter.version === undefined ? {} : { version: frontmatter.version }),
+      document,
+    });
+  }
+  if (!list) return { digest: baselines[0].digest, document: baselines[0].document };
+  // Newest first; Array.prototype.sort is stable, so equal versions keep their order.
+  return baselines.sort((left, right) => (right.version ?? -Infinity) - (left.version ?? -Infinity));
+}
 
 function registerContract(source, document, resourceDigest) {
   const frontmatter = matter(document).data;

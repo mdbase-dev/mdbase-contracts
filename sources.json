@@ -5,12 +5,12 @@
   },
   "typescript_implementation": {
     "repository": "callumalpass/mdbase",
-    "ref": "v0.3.0-rc.8"
+    "ref": "v0.3.0-rc.9"
   },
   "rust_cli": {
     "repository": "mdbase-dev/mdbase-connect",
-    "ref": "62242c21e754d27fee068e32ace02408bb572906",
+    "ref": "ab936db5395bc546b7e618c46e77326f81c10581",
     "engine_repository": "callumalpass/mdbase-rs",
-    "engine_ref": "c456e71b578c527448501ef7aec25825f13a9bea"
+    "engine_ref": "056db7334a0f49f10373225ae54c1abaedc14e37"
   }
 }
