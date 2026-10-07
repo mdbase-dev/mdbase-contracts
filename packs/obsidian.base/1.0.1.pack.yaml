@@ -1,0 +1,44 @@
+kind: mdbase.catalog-pack
+id: obsidian.base
+version: 1.0.1
+name: Obsidian Bases
+# Candidate: list when CollectionSetup installers can assess/apply this carrier.
+catalog: false
+description: The obsidian.base contract and an editable type that stores Obsidian Bases as records.
+display:
+  name: Obsidian Bases
+  summary: Use Obsidian Bases files as saved views that any view-aware app can list and run.
+  category: work
+  audience: general
+  icon: table
+  badges:
+    - Obsidian compatible
+installation:
+  visibility: default
+  recommendation: optional
+  primary_type: obsidian_base
+setup:
+  configuration:
+    requirements:
+      - id: obsidian-base-record-extension
+        path: /settings/record_extensions
+        predicate: contains
+        value: base
+    provisions:
+      - requirement: obsidian-base-record-extension
+        operation: set_add
+        path: /settings/record_extensions
+        value: base
+provides:
+  - id: obsidian.base
+    version: 1.0.0
+    digest: sha256:37e8a0bfb32bb4795c1b3c5dec613c32429aaa765dc33e4adc0c627a48f5c1ff
+resources:
+  - kind: contract
+    mode: managed
+    source: contracts/obsidian.base/1.0.0.md
+    target: _contracts/obsidian.base/1.0.0.md
+  - kind: type
+    mode: seed
+    source: types/obsidian-base/1.md
+    target: _types/obsidian_base.md

@@ -12,6 +12,7 @@ import { fileURLToPath } from "node:url";
 import matter from "gray-matter";
 import { parse } from "yaml";
 import { expandLocalReferences } from "./schema-expansion.mjs";
+import { validateConfigurationSetup } from "./configuration-setup.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const dist = join(root, "dist");
@@ -122,6 +123,7 @@ for (const packFile of packFiles) {
     },
     resources,
     provides,
+    ...(definition.setup === undefined ? {} : { setup: definition.setup }),
   };
   const provisionDocument = json(provision);
   const provisionPath = `packs/${definition.id}/${definition.version}.json`;
@@ -337,6 +339,7 @@ function validateEditableType(source, document, requireExpandedReferences) {
 }
 
 function validatePackDefinition(value, label) {
+  validateConfigurationSetup(value?.setup);
   if (!value || typeof value !== "object" || value.kind !== "mdbase.catalog-pack") {
     fail(`${label} must be an mdbase.catalog-pack object.`);
   }

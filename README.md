@@ -215,6 +215,31 @@ npm run build
 The importer refuses to overwrite differing existing versioned artifacts.
 Publish this catalog before consumers request its new immutable URLs.
 
+## Configuration setup carrier
+
+A catalog pack may declare `setup.configuration.requirements` and
+`setup.configuration.provisions`: the engine's existing
+`ConfigurationRequirement` (`contains`) and `ConfigurationProvision` (`set_add`)
+arrays. The published provision carries `setup` alongside `manifest`, never
+inside its strict `mdbase.type-pack` manifest. `scripts/configuration-setup.mjs`
+validates the carrier and lifts its arrays into `CollectionSetup.requirements`
+and `CollectionSetup.provisions`; the installer supplies the registered
+application identity/declaration digest and nested type-pack provisions.
+
+Installers must assess and apply that **whole envelope** through Core/replica,
+with the reviewed assessment digest and collection revision. They must not
+ignore `setup`, merge collection YAML themselves, or install its type pack in a
+separate mutation. Configuration and both receipts commit atomically. Existing
+sequence order/values and implicit `md` remain; uninstall does not subtract
+contributions. Only `/settings/record_extensions` is an exception to the
+existing `x-*` pointer confinement; other settings remain forbidden.
+
+`obsidian.base` **1.0.1** is an unlisted candidate carrying the explicit `base`
+record-extension requirement/provision. Version 1.0.0 and all contract/type
+bytes stay unchanged. List the candidate only after the catalog installer and
+Core/replica CollectionSetup path are qualified; the existing type-pack install
+verification is not evidence for configuration setup execution.
+
 ## Publishing
 
 `mdbase.dev` pins a reviewed commit of this repository, builds it, and copies
