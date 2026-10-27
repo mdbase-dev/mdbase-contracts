@@ -10,6 +10,16 @@
   },
   "contracts": [
     {
+      "id": "mdbase.app-settings",
+      "version": "1.0.0",
+      "name": "App settings",
+      "description": "One record per app holding the policy that app's clients honour in this collection.",
+      "contract_type": "record",
+      "digest": "sha256:9028d8ccd99cfbb4034399777376315486eb8e699aea7757a6b193743f1084c8",
+      "artifact": "./artifacts/contracts/mdbase.app-settings/1.0.0.md",
+      "standards": []
+    },
+    {
       "id": "mdbase.comment",
       "version": "1.0.0",
       "name": "Comment",
@@ -230,6 +240,16 @@
       "standards": []
     },
     {
+      "id": "tasknotes.settings",
+      "version": "1.0.0",
+      "name": "TaskNotes settings",
+      "description": "Collection-wide TaskNotes behaviour, such as templates, archive moves and status cycling.",
+      "contract_type": "record",
+      "digest": "sha256:e8c25653ef37c032fb4cb1f1c3f7c618092a09c4911a41aba42c0476796fe0d1",
+      "artifact": "./artifacts/contracts/tasknotes.settings/1.0.0.md",
+      "standards": []
+    },
+    {
       "id": "tasknotes.task",
       "version": "0.3.0-rc.3",
       "name": "TaskNotes task",
@@ -247,6 +267,16 @@
       "contract_type": "record",
       "digest": "sha256:ecadd00700e249940f4244aaa5b5985a96557d13340463ec491dfa5e89b032a4",
       "artifact": "./artifacts/contracts/tasknotes.task/0.3.0-rc.5.md",
+      "standards": []
+    },
+    {
+      "id": "tasknotes.task",
+      "version": "0.3.0-rc.6",
+      "name": "TaskNotes task",
+      "description": "Portable task data and behavior defined by tasknotes-spec 0.3.0-rc.6.",
+      "contract_type": "record",
+      "digest": "sha256:3f4eb90782948ed68112ffcc99575911036020544cf501de3d2265b588b38456",
+      "artifact": "./artifacts/contracts/tasknotes.task/0.3.0-rc.6.md",
       "standards": []
     }
   ],
@@ -868,7 +898,7 @@
         ]
       },
       "installation": {
-        "visibility": "default",
+        "visibility": "hidden",
         "recommendation": "integration-managed",
         "primary_type": "task",
         "caution": "Upgrades the previous starter type while preserving independent customizations. Conflicts or other references to the previous contract block the whole upgrade.",
@@ -876,6 +906,58 @@
           {
             "name": "task",
             "label": "Task"
+          }
+        ]
+      }
+    },
+    {
+      "id": "tasknotes.task",
+      "version": "0.3.0-rc.19",
+      "name": "TaskNotes task type pack",
+      "description": "Portable tasks whose app behaviour (templates, archive moves, status cycling, time tracking and link format) lives in a TaskNotes settings record, with a reviewed, atomic upgrade from every TaskNotes starter published before.",
+      "digest": "sha256:ca9ac8ad5c90c7d9a19be226153a32b619b9156f83f95c38ad7ad2346e094b63",
+      "provision": "./packs/tasknotes.task/0.3.0-rc.19.json",
+      "provides": [
+        {
+          "id": "tasknotes.task",
+          "version": "0.3.0-rc.6",
+          "digest": "sha256:c400ead6e218b715d86ad31125bb3d4b2e276817da6ba8065449fd0947b24d67"
+        },
+        {
+          "id": "tasknotes.settings",
+          "version": "1.0.0",
+          "digest": "sha256:a61d55535871d27e9599cb3588148a0590d9e2198d6ee7a0bf3197350b60dc53"
+        },
+        {
+          "id": "mdbase.app-settings",
+          "version": "1.0.0",
+          "digest": "sha256:4ae872a56290e2739ff876df1ca8fdac428753c854d65fd8e8e62045bd643a4e"
+        }
+      ],
+      "resource_count": 10,
+      "display": {
+        "name": "TaskNotes tasks",
+        "summary": "Manage portable Markdown tasks, assignments, dates, recurrence, reminders, and time tracking.",
+        "category": "work",
+        "audience": "general",
+        "icon": "square-check-big",
+        "badges": [
+          "TaskNotes compatible"
+        ]
+      },
+      "installation": {
+        "visibility": "default",
+        "recommendation": "integration-managed",
+        "primary_type": "task",
+        "caution": "Upgrades the previous starter type while preserving independent customizations. Conflicts block the whole upgrade. TaskNotes moves settings an edited type still holds into its settings record when it upgrades that type.",
+        "types": [
+          {
+            "name": "task",
+            "label": "Task"
+          },
+          {
+            "name": "tasknotes-settings",
+            "label": "Tasknotes settings"
           }
         ]
       }

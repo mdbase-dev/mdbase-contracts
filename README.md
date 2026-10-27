@@ -196,6 +196,29 @@ hidden. A customised task type whose lock records no origin is preserved, and
 because it still implements the replaced contract the upgrade is blocked for
 review rather than merged against a guessed starter.
 
+## TaskNotes settings record
+
+rc.19 provides `tasknotes.task` 0.3.0-rc.6, `tasknotes.settings` 1.0.0 and the
+generic `mdbase.app-settings` 1.0.0 (copied byte for byte from mdbase Reader, so
+both apps install the same contract). rc.6 moves app behaviour out of the task
+binding: NLP triggers, templating, archive moves, time tracking, checkbox
+resets on recurrence, the link write format, and per-status `next_status`,
+`exclude_from_cycle`, `auto_archive` and `auto_archive_delay_minutes`. TaskNotes
+keeps them in one record, `_settings/dev.tasknotes.md`, of the seeded
+`tasknotes-settings` type (unique on `app`). The pack seeds the type only; the
+record is written by TaskNotes, which reads each setting from the record, then
+from an rc.5 binding that still holds it, then its default.
+
+The rc.6 contract is installed at `_contracts/tasknotes.task/0.3.0-rc.6.md`.
+The rc.5 contract stays managed at `_contracts/tasknotes.task.md`, not
+provided, so task types that still implement it (edited types the pack
+preserves, and types the TaskNotes plugin wrote) stay valid until TaskNotes
+upgrades them. Starter revision 6 (type v5) is revision 5 with the moved
+settings removed and the contract version raised; it lists revisions 5 to 1 as
+baselines, and rc.18 is hidden. A collection that edited its status
+definitions (for example their colours) conflicts on that list and the
+upgrade is blocked for review; TaskNotes upgrades such a type itself.
+
 Starter files are named by revision (`types/tasknotes-task/<revision>.md`); a
 revision that does not change the task data keeps the type `version`, so
 collections already at that version upgrade without a version conflict.
