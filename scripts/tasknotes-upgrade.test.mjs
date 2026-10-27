@@ -30,10 +30,28 @@ const targets = [
   { pack: "0.3.0-rc.17", contract: /0\.3\.0-rc\.5/, links: /assignees\[\]:/, minimal: true, customMapping: true },
   // rc.18 ships rc.17's starter and lists every earlier starter as a baseline.
   { pack: "0.3.0-rc.18", contract: /0\.3\.0-rc\.5/, links: /assignees\[\]:/, minimal: true, customMapping: true },
+  // rc.19 (tasknotes.task rc.6) moves app behaviour out of the binding into
+  // the TaskNotes settings record; nothing else in the starter changes.
+  { pack: "0.3.0-rc.19", contract: /0\.3\.0-rc\.6/, links: /assignees\[\]:/, minimal: true, customMapping: true, settingsRecord: true },
 ];
 
-// Everything an upgrade may change in the starter type: assignees and versions.
-function withoutAssignees(document) {
+// The binding settings tasknotes.task rc.6 moved to the TaskNotes settings record.
+function withoutAppSettings(type) {
+  const binding = type.implements.find((entry) => entry.contract === "tasknotes.task").binding;
+  for (const key of ["nlp", "templating", "time_tracking"]) delete binding[key];
+  delete binding.archive?.move_on_archive;
+  delete binding.archive?.folder;
+  delete binding.recurrence?.reset_body_checkboxes;
+  delete binding.links?.write_format;
+  for (const definition of binding.status?.definitions ?? []) {
+    for (const key of ["next_status", "exclude_from_cycle", "auto_archive", "auto_archive_delay_minutes"]) delete definition[key];
+  }
+  return type;
+}
+
+// Everything an upgrade may change in the starter type: assignees, versions
+// and (from rc.19) the settings moved to the settings record.
+function withoutAssignees(document, settingsRecord = false) {
   const type = parse(document.slice(4, document.indexOf("\n---", 4)));
   delete type.version;
   delete type.schema.value.properties.assignees;
@@ -42,7 +60,7 @@ function withoutAssignees(document) {
   delete implementation.version;
   delete implementation.fields.assignees;
   type["x-tasknotes-generator"].managed_fields = type["x-tasknotes-generator"].managed_fields.filter((field) => field !== "assignees");
-  return type;
+  return settingsRecord ? withoutAppSettings(type) : type;
 }
 for (const target of targets) for (const scenario of ["managed", "customized", "customized-without-origin", "generator-defaults", "custom-mapping", "unmanaged", "conflict", "other-reference"]) {
   if (scenario === "generator-defaults" && !target.minimal) continue;
@@ -103,8 +121,16 @@ for (const target of targets) for (const scenario of ["managed", "customized", "
       // 05A) is never merged against a guessed baseline. It is preserved, and as
       // it still requires the replaced contract the whole upgrade is blocked,
       // exactly as for any other reference to that contract.
-      const success = !["conflict", "other-reference", "customized-without-origin"].includes(scenario);
+      // rc.19 changes the starter's status definitions (their behaviour moved
+      // to the settings record), and a collection that also edited them (here,
+      // colours) conflicts on that list: the upgrade is blocked, the collection
+      // keeps its rc.5 type, and TaskNotes upgrades it itself.
+      const definitionsConflict = target.settingsRecord && scenario === "generator-defaults";
+      const success = !["conflict", "other-reference", "customized-without-origin"].includes(scenario) && !definitionsConflict;
       assert.equal(result.valid, success, JSON.stringify(result));
+      if (definitionsConflict) {
+        assert.match(JSON.stringify(result.diagnostics), /binding\/status\/definitions/);
+      }
       if (scenario === "customized-without-origin") {
         assert.match(JSON.stringify(result.diagnostics), /tasknotes\.task.{1,4}0\.3\.0-rc\.3/);
       }
@@ -117,8 +143,17 @@ for (const target of targets) for (const scenario of ["managed", "customized", "
         assert.match(upgraded, target.contract);
         if (target.links) assert.match(upgraded, target.links);
         if (target.minimal) {
-          assert.deepEqual(withoutAssignees(upgraded), withoutAssignees(new Map(before).get("_types/task.md")));
+          assert.deepEqual(
+            withoutAssignees(upgraded, target.settingsRecord),
+            withoutAssignees(new Map(before).get("_types/task.md"), target.settingsRecord),
+          );
           assert.match(upgraded, /- cancelled/);
+        }
+        if (target.settingsRecord) {
+          // The settings type is seeded; the record itself is the app's to write.
+          assert.match(await readFile(join(root, "_types/tasknotes-settings.md"), "utf8"), /tasknotes\.settings/);
+          assert.doesNotMatch(upgraded, /move_on_archive|time_tracking|templating:/);
+          await assert.rejects(readFile(join(root, "_settings/dev.tasknotes.md"), "utf8"), { code: "ENOENT" });
         }
         if (scenario === "customized") {
           assert.match(upgraded, /title: heading/);

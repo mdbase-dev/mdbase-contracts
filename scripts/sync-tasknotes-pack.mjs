@@ -8,7 +8,9 @@ const { buildTaskNotesMdbaseTypePack, TASKNOTES_TASK_CONTRACT_VERSION } = await 
 // The published starter, not the model's plugin defaults: those omit the
 // cancelled status and declare profiles the starter does not implement.
 const { buildTaskNotesStarterResources, TASKNOTES_STARTER_REVISION } = await import(pathToFileURL(join(model, "dist/esm/starter.js")).href);
+const { buildTaskNotesSettingsResources, TASKNOTES_SETTINGS_CONTRACT_VERSION, TASKNOTES_SETTINGS_TYPE_VERSION } = await import(pathToFileURL(join(model, "dist/esm/settings.js")).href);
 const resources = buildTaskNotesStarterResources();
+const settings = buildTaskNotesSettingsResources();
 // Also verifies the model's pinned semantic digest before importing anything.
 await buildTaskNotesMdbaseTypePack(resources);
 const version = TASKNOTES_TASK_CONTRACT_VERSION;
@@ -18,6 +20,10 @@ for (const [path, document] of [
   [`schemas/tasknotes.task.binding/${version}.schema.json`, resources.bindingSchemaDocument],
   // Named by starter revision: a revision may keep the type version.
   [`types/tasknotes-task/${TASKNOTES_STARTER_REVISION}.md`, resources.typeDocument],
+  // The app settings record type (tasknotes.settings + mdbase.app-settings).
+  [`contracts/tasknotes.settings/${TASKNOTES_SETTINGS_CONTRACT_VERSION}.md`, settings.contractDocument],
+  [`schemas/tasknotes.settings/${TASKNOTES_SETTINGS_CONTRACT_VERSION}.schema.json`, settings.schemaDocument],
+  [`types/tasknotes-settings/${TASKNOTES_SETTINGS_TYPE_VERSION}.md`, settings.typeDocument],
 ]) {
   const destination = join(root, path);
   let previous;

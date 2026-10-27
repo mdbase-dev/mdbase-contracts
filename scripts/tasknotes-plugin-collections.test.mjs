@@ -9,7 +9,7 @@ import { packEngine } from "./pack-engine.mjs";
 // TaskNotes 4.13.6 and the 5.0 betas, with default and customized settings).
 // Every TaskNotes pack must install over them, as TaskNotes App does through
 // Connect, without conflicts and without dropping statuses or touching records.
-const LATEST = "0.3.0-rc.18";
+const LATEST = "0.3.0-rc.19";
 const fixtures = new URL("./fixtures/tasknotes-5.0/", import.meta.url);
 
 async function reviewedInstall(engine) {
@@ -50,13 +50,18 @@ for (const name of (await readdir(fixtures)).filter((file) => file.endsWith(".js
       if (starter) {
         assert.equal(planned.action, "update");
         assert.equal(type, provision.resources.find(({ source }) => source === seed.source).document);
+        assert.match(type, /version: 0\.3\.0-rc\.6/);
       } else {
+        // A preserved type keeps implementing rc.5, whose contract the pack
+        // retains; TaskNotes upgrades it and writes the settings record.
         assert.equal(planned.action, "preserve");
         assert.match(planned.reason, /no upgrade baseline applies/);
         assert.equal(type, files["_types/task.md"]);
+        assert.match(type, /version: 0\.3\.0-rc\.5/);
+        assert.match(await readFile(join(root, "_contracts/tasknotes.task.md"), "utf8"), /version: 0\.3\.0-rc\.5/);
       }
       if (files["_types/task.md"].includes("- cancelled")) assert.match(type, /- cancelled/);
-      assert.match(type, /version: 0\.3\.0-rc\.5/);
+      assert.match(await readFile(join(root, "_types/tasknotes-settings.md"), "utf8"), /name: tasknotes-settings/);
       for (const path of Object.keys(files).filter((path) => !path.startsWith("_") && !path.startsWith("mdbase"))) {
         assert.equal(await readFile(join(root, path), "utf8"), files[path], path);
       }

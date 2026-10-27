@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "mdbase.app-settings 1.0.0 record contract view",
+  "description": "The reserved fields every app settings record shares. Everything else in the record belongs to the app and is described by the app's own settings contract.",
+  "type": "object",
+  "required": ["app", "scope", "settings_version"],
+  "properties": {
+    "app": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+([.-][a-z0-9]+)*$",
+      "description": "The app whose clients honour these settings, such as tasknotes or dev.mdbase.reader."
+    },
+    "scope": {
+      "enum": ["collection", "user"],
+      "description": "Who the values apply to: everyone using the app in this collection, or one person."
+    },
+    "user": {
+      "type": "string",
+      "minLength": 1,
+      "description": "A link to the mdbase.person record the values apply to. Present only when scope is user."
+    },
+    "settings_version": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "The version of the app's settings schema that last wrote the record. A client that does not understand it treats the settings as read-only."
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "scope": { "const": "user" } }, "required": ["scope"] },
+      "then": { "required": ["user"] },
+      "else": { "not": { "required": ["user"] } }
+    }
+  ],
+  "additionalProperties": true
+}

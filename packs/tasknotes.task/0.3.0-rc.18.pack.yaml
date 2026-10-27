@@ -12,7 +12,7 @@ display:
   badges:
     - TaskNotes compatible
 installation:
-  visibility: default
+  visibility: hidden
   recommendation: integration-managed
   primary_type: task
   caution: Upgrades the previous starter type while preserving independent customizations. Conflicts or other references to the previous contract block the whole upgrade.
