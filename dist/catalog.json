@@ -40,6 +40,16 @@
       "standards": []
     },
     {
+      "id": "mdbase.daily-note",
+      "version": "1.0.0",
+      "name": "Daily note",
+      "description": "One record per local calendar day, identified by its date.",
+      "contract_type": "record",
+      "digest": "sha256:797ad463925497c07a42d364e513116ad3495792927087370be776e73bbe65b7",
+      "artifact": "./artifacts/contracts/mdbase.daily-note/1.0.0.md",
+      "standards": []
+    },
+    {
       "id": "mdbase.person",
       "version": "1.0.0",
       "name": "Person",
@@ -562,6 +572,44 @@
           {
             "name": "person",
             "label": "Person"
+          }
+        ]
+      }
+    },
+    {
+      "id": "mdbase.daily-note",
+      "version": "1.0.0",
+      "name": "Daily notes",
+      "description": "The mdbase.daily-note contract and an editable Daily note type with one note per calendar day.",
+      "digest": "sha256:cb93c368c2bdbeb99dfb92a19d535da42221715a665d2047ed1fff3ef30d8c9b",
+      "provision": "./packs/mdbase.daily-note/1.0.0.json",
+      "provides": [
+        {
+          "id": "mdbase.daily-note",
+          "version": "1.0.0",
+          "digest": "sha256:8ef734d7eeee420fd9c5c1b25f26bfde8bb72ab9e96bc5c3f9923ba251d69ea6"
+        }
+      ],
+      "resource_count": 3,
+      "display": {
+        "name": "Daily notes",
+        "summary": "Keep one note per day that any daily-note-aware app can find and open.",
+        "category": "calendar",
+        "audience": "general",
+        "icon": "calendar",
+        "badges": [
+          "Portable daily notes"
+        ]
+      },
+      "installation": {
+        "visibility": "default",
+        "recommendation": "optional",
+        "primary_type": "daily-note",
+        "caution": "Requires an mdbase engine with path-stored fields (mdbase 0.3.0-rc.6). Older engines reject the Daily note type, which keeps each note's date in its file name.",
+        "types": [
+          {
+            "name": "daily-note",
+            "label": "Daily note"
           }
         ]
       }
