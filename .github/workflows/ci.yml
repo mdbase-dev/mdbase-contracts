@@ -11,81 +11,60 @@ permissions:
 
 jobs:
   verify:
-    name: verify (${{ matrix.engine }})
+    name: verify
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        # Every pack is installed, upgraded, and tested through both engines.
-        # mdbase-ts also reopens installed collections in both legs.
-        engine: [mdbase-ts, mdbase-cli]
     steps:
       - name: Check out contracts
         uses: actions/checkout@v7
 
-      - name: Read pinned implementation identity
+      - name: Read pinned engine identity
         id: sources
         run: |
-          echo "repository=$(jq -r '.typescript_implementation.repository' sources.json)" >> "$GITHUB_OUTPUT"
-          echo "ref=$(jq -r '.typescript_implementation.ref' sources.json)" >> "$GITHUB_OUTPUT"
-          echo "cli_repository=$(jq -r '.rust_cli.repository' sources.json)" >> "$GITHUB_OUTPUT"
-          echo "cli_ref=$(jq -r '.rust_cli.ref' sources.json)" >> "$GITHUB_OUTPUT"
-          echo "engine_repository=$(jq -r '.rust_cli.engine_repository' sources.json)" >> "$GITHUB_OUTPUT"
-          echo "engine_ref=$(jq -r '.rust_cli.engine_ref' sources.json)" >> "$GITHUB_OUTPUT"
+          echo "repository=$(jq -r '.mdbase_engine.repository' sources.json)" >> "$GITHUB_OUTPUT"
+          echo "ref=$(jq -r '.mdbase_engine.ref' sources.json)" >> "$GITHUB_OUTPUT"
+          echo "package=$(jq -r '.mdbase_engine.package' sources.json)" >> "$GITHUB_OUTPUT"
 
-      - name: Check out TypeScript implementation
+      # Every pack is installed, upgraded and tested through the mdbase engine
+      # that the daemon, the Obsidian plugin and the SDK run (mdbase-connect
+      # runtime/), built from its `mdbase` package at the pinned commit.
+      - name: Check out mdbase engine
         uses: actions/checkout@v7
         with:
           repository: ${{ steps.sources.outputs.repository }}
           ref: ${{ steps.sources.outputs.ref }}
-          path: .sources/mdbase
+          path: .sources/mdbase-connect
+          sparse-checkout: runtime
 
-      - name: Check out mdbase CLI
-        if: matrix.engine == 'mdbase-cli'
-        uses: actions/checkout@v7
-        with:
-          repository: ${{ steps.sources.outputs.cli_repository }}
-          ref: ${{ steps.sources.outputs.cli_ref }}
-          path: .sources/cli/mdbase-connect
-
-      - name: Check out its Rust engine
-        if: matrix.engine == 'mdbase-cli'
-        uses: actions/checkout@v7
-        with:
-          repository: ${{ steps.sources.outputs.engine_repository }}
-          ref: ${{ steps.sources.outputs.engine_ref }}
-          path: .sources/cli/mdbase-rs
+      - name: Install pinned Rust toolchain
+        working-directory: .sources/mdbase-connect/runtime
+        run: rustup toolchain install && rustup show active-toolchain
 
       - uses: Swatinem/rust-cache@v2
-        if: matrix.engine == 'mdbase-cli'
         with:
-          workspaces: .sources/cli/mdbase-connect
-
-      - name: Build mdbase CLI
-        if: matrix.engine == 'mdbase-cli'
-        working-directory: .sources/cli/mdbase-connect
-        run: |
-          cargo build --locked -p mdbase-cli --bin mdbase
-          echo "MDBASE_VERIFY_CLI=$PWD/target/debug/mdbase" >> "$GITHUB_ENV"
+          workspaces: .sources/mdbase-connect/runtime
 
       - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
 
+      - name: Build mdbase engine
+        working-directory: .sources/mdbase-connect/runtime
+        run: |
+          npm ci --prefix tools/wasm --no-audit --no-fund
+          cargo xtask mdbase-wasm
+          cd "${{ github.workspace }}/.sources/mdbase-connect/${{ steps.sources.outputs.package }}"
+          npm ci --no-audit --no-fund
+          npm run build:native
+          npm run build
+          echo "MDBASE_DIR=$PWD" >> "$GITHUB_ENV"
+          echo "mdbase $(jq -r .version package.json) at $(git rev-parse HEAD)"
+
       - name: Install catalog dependencies
         run: npm ci
 
-      - name: Build TypeScript implementation
-        working-directory: .sources/mdbase
-        run: |
-          npm ci && npm run build
-          echo "mdbase-ts $(jq -r .version package.json) at $(git rev-parse HEAD)"
-
-      - name: Build and verify catalog with ${{ matrix.engine }}
+      - name: Build and verify catalog
         run: npm test
-        env:
-          MDBASE_TS_DIR: .sources/mdbase
 
       - name: Check deterministic publication output
         run: git diff --exit-code -- dist
