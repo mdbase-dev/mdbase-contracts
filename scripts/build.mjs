@@ -148,6 +148,18 @@ for (const packFile of packFiles) {
   }
 }
 
+// Apps list every non-hidden pack, so a superseded version left visible shows
+// as a duplicate choice. Hide the previous version when publishing a new one.
+const offered = new Map();
+for (const pack of packs) {
+  if (pack.installation.visibility === "hidden") continue;
+  const previous = offered.get(pack.id);
+  if (previous) {
+    fail(`${pack.id} offers both ${previous} and ${pack.version}; hide the superseded version.`);
+  }
+  offered.set(pack.id, pack.version);
+}
+
 const catalog = {
   ...catalogSource,
   contracts: [...contracts.values()].sort(compareIdentity),

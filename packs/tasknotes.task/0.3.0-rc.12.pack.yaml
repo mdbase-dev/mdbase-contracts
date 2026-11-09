@@ -12,7 +12,7 @@ display:
   badges:
     - TaskNotes compatible
 installation:
-  visibility: default
+  visibility: hidden
   recommendation: integration-managed
   primary_type: task
   caution: TaskNotes applications manage the contract and schemas; the installed task type remains editable.
