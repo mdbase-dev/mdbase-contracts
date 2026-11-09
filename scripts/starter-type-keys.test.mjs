@@ -9,7 +9,7 @@ const root = new URL("../", import.meta.url);
 // configured explicit type key (`type` by default, `mdbase_type` in some collections).
 // A starter that requires or pins its own name under `type`, or rejects unknown
 // top-level fields, fails in every collection whose key is something else.
-for (const source of ["types/person/3.md", "types/comment/2.md", "types/view/2.md"]) {
+for (const source of ["types/person/3.md", "types/comment/2.md", "types/view/2.md", "types/daily-note/1.md"]) {
   test(`${source} leaves the type key to the collection`, async () => {
     const type = matter(await readFile(new URL(source, root), "utf8")).data;
     const schema = type.schema.value;

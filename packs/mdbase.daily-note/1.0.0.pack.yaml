@@ -1,0 +1,34 @@
+kind: mdbase.catalog-pack
+id: mdbase.daily-note
+version: 1.0.0
+name: Daily notes
+description: The mdbase.daily-note contract and an editable Daily note type with one note per calendar day.
+display:
+  name: Daily notes
+  summary: Keep one note per day that any daily-note-aware app can find and open.
+  category: calendar
+  audience: general
+  icon: calendar
+  badges:
+    - Portable daily notes
+installation:
+  visibility: default
+  recommendation: optional
+  primary_type: daily-note
+  caution: Requires an mdbase engine with path-stored fields (mdbase 0.3.0-rc.6). Older engines reject the Daily note type, which keeps each note's date in its file name.
+provides:
+  - id: mdbase.daily-note
+    version: 1.0.0
+resources:
+  - kind: schema
+    mode: managed
+    source: schemas/mdbase.daily-note/1.0.0.schema.json
+    target: schemas/mdbase.daily-note/1.0.0.schema.json
+  - kind: contract
+    mode: managed
+    source: contracts/mdbase.daily-note/1.0.0.md
+    target: _contracts/mdbase.daily-note/1.0.0.md
+  - kind: type
+    mode: seed
+    source: types/daily-note/1.md
+    target: _types/daily-note.md

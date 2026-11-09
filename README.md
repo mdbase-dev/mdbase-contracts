@@ -53,6 +53,17 @@ records of their own, anchored to a quote of the commented record's Markdown
 body and linked to `mdbase.person` authors. Apps that comment embed the
 published provision unchanged, as mdbase writer does.
 
+The `mdbase.daily-note` pack defines one record per local calendar day,
+identified by its `date` (an RFC 3339 full-date), never by its path. Apps find
+daily notes through the contract's type implementations and treat a date held
+by several records as ambiguous. The **Daily note** starter stores the date
+only in the file name, `Daily/YYYY-MM-DD.md`, with `collection.path.fields`
+(path-stored fields, mdbase 0.3.0-rc.6), and matches only date-named files in
+that folder so other notes there keep their own types. The pack needs an engine
+with path-stored fields: the pinned mdbase-ts and Rust CLI reject the starter
+until `sources.json` moves to engines that implement them. See
+[`mdbase.daily-note` 1.0.0](contracts/mdbase.daily-note/1.0.0.md).
+
 The `tasknotes.task` pack is the canonical application-provisioned TaskNotes
 contract bundle. TaskNotes clients embed the published provision byte-for-byte
 and pin its catalog digest so independently deployed clients cannot drift onto

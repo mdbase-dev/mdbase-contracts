@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mdbase.dev/contracts/schemas/mdbase.daily-note/1.0.0.schema.json",
+  "title": "Daily note",
+  "description": "A record that represents one local calendar day, identified by its date.",
+  "type": "object",
+  "required": [
+    "date"
+  ],
+  "properties": {
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "The calendar day this record represents, as an RFC 3339 full-date (YYYY-MM-DD). A civil date with no time or time zone."
+    }
+  },
+  "additionalProperties": false
+}

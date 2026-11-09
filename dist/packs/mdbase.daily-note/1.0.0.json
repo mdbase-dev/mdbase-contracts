@@ -1,0 +1,53 @@
+{
+  "manifest": {
+    "kind": "mdbase.type-pack",
+    "id": "mdbase.daily-note",
+    "version": "1.0.0",
+    "name": "Daily notes",
+    "description": "The mdbase.daily-note contract and an editable Daily note type with one note per calendar day.",
+    "resources": [
+      {
+        "kind": "schema",
+        "mode": "managed",
+        "source": "schemas/mdbase.daily-note/1.0.0.schema.json",
+        "target": "schemas/mdbase.daily-note/1.0.0.schema.json",
+        "digest": "sha256:a71471a2a941fe39ca6052ecf9189ac8156d76127d8792be49c29ab35d385080"
+      },
+      {
+        "kind": "contract",
+        "mode": "managed",
+        "source": "contracts/mdbase.daily-note/1.0.0.md",
+        "target": "_contracts/mdbase.daily-note/1.0.0.md",
+        "digest": "sha256:797ad463925497c07a42d364e513116ad3495792927087370be776e73bbe65b7"
+      },
+      {
+        "kind": "type",
+        "mode": "seed",
+        "source": "types/daily-note/1.md",
+        "target": "_types/daily-note.md",
+        "digest": "sha256:e9800bb1c091b0e0c6df01f773afdb4346473d379b5738b22d0c31139d18635e"
+      }
+    ]
+  },
+  "resources": [
+    {
+      "source": "schemas/mdbase.daily-note/1.0.0.schema.json",
+      "document": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"$id\": \"https://mdbase.dev/contracts/schemas/mdbase.daily-note/1.0.0.schema.json\",\n  \"title\": \"Daily note\",\n  \"description\": \"A record that represents one local calendar day, identified by its date.\",\n  \"type\": \"object\",\n  \"required\": [\n    \"date\"\n  ],\n  \"properties\": {\n    \"date\": {\n      \"type\": \"string\",\n      \"format\": \"date\",\n      \"description\": \"The calendar day this record represents, as an RFC 3339 full-date (YYYY-MM-DD). A civil date with no time or time zone.\"\n    }\n  },\n  \"additionalProperties\": false\n}\n"
+    },
+    {
+      "source": "contracts/mdbase.daily-note/1.0.0.md",
+      "document": "---\nkind: mdbase.contract\ncontract_type: record\nid: mdbase.daily-note\nversion: 1.0.0\nname: Daily note\ndescription: One record per local calendar day, identified by its date.\nrecord_schema:\n  dialect: json-schema-2020-12\n  ref: ../../schemas/mdbase.daily-note/1.0.0.schema.json\n---\n\n# Daily note\n\nA record exposed through `mdbase.daily-note` represents one local calendar day.\n`date` is an RFC 3339 full-date such as `2026-10-30`: a civil day with no time\nand no time zone. It names the day the user lived, not an instant, so it does\nnot change when the user or the collection changes time zone.\n\n## Identity\n\nA daily note is identified by its `date` value, never by its path or file name.\nAn implementing type may store the date in the path, for example with\n`collection.path.fields`, but consumers read the contract field and never parse\npaths or file names themselves.\n\n## Discovery\n\nImplementing this contract is how a collection declares which of its records\nare daily notes. An application discovers daily notes through this contract's\ntype implementations, not through a folder, a file-name format, or a reserved\ntype name, path, or frontmatter value.\n\n## One record per day\n\nA collection should hold at most one record per date across all types that\nimplement this contract. To find the note for a day, an application queries\nevery implementing type for that date:\n\n- No record: the day has no daily note. This is not an error.\n- Exactly one record: that record is the day's note.\n- Several records: the date is ambiguous. Applications MUST report the\n  ambiguity and MUST NOT silently pick one of the records, merge them, or\n  write to one of them as the day's note.\n\nA partial or failed query cannot establish that a day has no note or exactly\none note. Implementing types may declare `collection.unique` on their date\nfield so the engine reports duplicates within the type.\n\n## Creating a daily note\n\nAn application creates a daily note through the implementing type's ordinary\ncreate operation and path policy. File names, folders, templates and the body\nbelong to the type and the collection; the contract does not prescribe them.\nAn application that opens the note for a day, such as today in the user's\ntime zone, first looks for an existing record for that date and creates one\nonly when there is none.\n\n## Other day data\n\nOther applications may attach their own data to a day, such as time blocks or\ncompleted pomodoros, through separate contracts implemented by the same type.\nThis contract defines only the day itself.\n\nThis artifact is passive. Implementing it grants no authority to read, create,\nor modify any record.\n"
+    },
+    {
+      "source": "types/daily-note/1.md",
+      "document": "---\nkind: mdbase.type\nname: daily-note\nversion: 1\ndescription: One note per calendar day, named by its date in the Daily folder.\nmatch:\n  path_glob: 'Daily/[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9].md'\nschema:\n  dialect: json-schema-2020-12\n  value:\n    $schema: https://json-schema.org/draft/2020-12/schema\n    title: Daily note\n    description: One local calendar day represented by an ordinary note. The date is stored in the file name, not in frontmatter.\n    type: object\n    required:\n      - date\n    properties:\n      date:\n        type: string\n        format: date\n        description: The day this note is for, as a full calendar date in YYYY-MM-DD form, with no time or time zone. It is stored in the file name (Daily/2026-10-30.md), so changing it renames the note; do not also write it in frontmatter.\n    additionalProperties: true\ncollection:\n  path:\n    pattern: 'Daily/{date}.md'\n    fields:\n      - date\n  unique:\n    - field: date\n      scope: type\n  display:\n    name_field: date\n    icon: calendar\nimplements:\n  - contract: mdbase.daily-note\n    version: 1.0.0\n    fields:\n      date: date\n---\n\n# Daily note\n\nOne note per day, at `Daily/YYYY-MM-DD.md`. The date lives only in the file\nname: apps read it from the path, and creating a note for a date puts it at\nthat date's path. The rest of the note is yours: write in the body and add any\nfrontmatter fields you like.\n\n```text\nDaily/2026-10-30.md\n```\n\nOnly files in `Daily/` whose name is a date belong to this type, so other notes\nin the folder are left alone. A collection should have one note per date; two\nnotes with the same date are reported, and apps treat that day as ambiguous\nrather than choosing one.\n\n## Use an existing daily-notes folder\n\nTo adopt notes another tool already writes, such as Obsidian's daily notes,\nchange the folder in both `match.path_glob` and `collection.path.pattern`. For\nnotes in `Journal/`:\n\n```yaml\nmatch:\n  path_glob: 'Journal/[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9].md'\ncollection:\n  path:\n    pattern: 'Journal/{date}.md'\n    fields: [date]\n```\n\nNotes are recognised by their path, so existing files need no frontmatter\nchanges. File names must use the `YYYY-MM-DD` form.\n\nThis type belongs to your collection once installed. Apps find daily notes\nthrough the `mdbase.daily-note` contract, not through this folder or file name,\nso you can move them, or add other types that implement the contract, as long\nas each date has one note.\n"
+    }
+  ],
+  "provides": [
+    {
+      "id": "mdbase.daily-note",
+      "version": "1.0.0",
+      "digest": "sha256:8ef734d7eeee420fd9c5c1b25f26bfde8bb72ab9e96bc5c3f9923ba251d69ea6"
+    }
+  ]
+}
