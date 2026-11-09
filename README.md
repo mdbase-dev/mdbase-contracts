@@ -158,10 +158,11 @@ duplicate or self baselines, and baselines whose type `kind` or `name` differs
 from the desired starter.
 
 Engines replace a starter equal to any listed baseline with the exact new
-starter, and merge an edited starter only against the baseline its lock records
-as its `origin_digest`; an edited type with no recorded origin (installed by an
-engine before 05A) or an unlisted origin is preserved with a reason. An
-unlisted starter is therefore never upgraded, so the catalog keeps an
+starter, and merge an edited starter against the baseline its lock records as
+its `origin_digest`. An edited type with no recorded origin (installed by an
+engine before 05A) or an unlisted origin merges against the nearest listed
+baseline that merges cleanly; failing that it is preserved. An unlisted
+starter is therefore upgraded only by inference, so the catalog keeps an
 invariant, checked by `scripts/seed-baselines.test.mjs`: for every offered
 (non-hidden) pack and seed target, `upgrade_from` lists every starter that any
 earlier version of the pack shipped at that target, including unlisted
@@ -191,9 +192,8 @@ conflicted wherever that mapping was customized. rc.16 is not listed.
 rc.18 ships rc.17's starter unchanged and lists every earlier starter as an
 upgrade baseline (revisions 4, 3, 2 and 1, from rc.16, rc.15, rc.13/rc.14 and
 rc.12), so a collection seeded by any earlier pack upgrades to it. rc.17 is
-hidden. A customised task type whose lock records no origin is preserved, and
-because it still implements the replaced contract the upgrade is blocked for
-review rather than merged against a guessed starter.
+hidden. A customised task type whose lock records no origin merges against
+the nearest earlier starter, keeping its customisations.
 
 ## TaskNotes settings record
 
