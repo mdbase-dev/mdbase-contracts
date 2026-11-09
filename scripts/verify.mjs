@@ -5,7 +5,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import Ajv2020 from "ajv/dist/2020.js";
 import addFormats from "ajv-formats";
-import { mdbase, packEngine, packEngineName } from "./pack-engine.mjs";
+import { Collection, contractImplementations, packEngine, packEngineName } from "./pack-engine.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const dist = join(root, "dist");
@@ -19,8 +19,6 @@ addFormats(ajv);
 if (!ajv.validate(catalogSchema, catalog)) {
   fail(`Catalog is invalid:\n${ajv.errorsText(ajv.errors, { separator: "\n" })}`);
 }
-
-const { Collection } = mdbase;
 
 for (const contract of catalog.contracts) {
   const artifact = await readCatalogArtifact(contract.artifact);
@@ -76,22 +74,20 @@ for (const pack of catalog.packs) {
       fail(`${pack.id} repeat install is not idempotent.`);
     }
 
-    const opened = await Collection.open(collectionRoot);
-    if (!opened.collection || opened.error) {
-      fail(`${pack.id} could not be reopened: ${opened.error?.message ?? "unknown error"}.`);
-    }
+    // The installed collection opens on disk and its catalog is valid.
+    const collection = await Collection.open(collectionRoot);
     try {
-      for (const provided of pack.provides) {
-        const implementations = opened.collection.getDataContractImplementations(
-          provided.id,
-          provided.version,
-        );
-        if (implementations.length === 0) {
-          fail(`${pack.id} provides ${provided.id} ${provided.version} without an implementation.`);
-        }
+      const reopened = await collection.catalog();
+      if (!reopened.valid) {
+        fail(`${pack.id} could not be reopened:\n${JSON.stringify(reopened.issues, null, 2)}`);
       }
     } finally {
-      await opened.collection.close();
+      await collection.close();
+    }
+    for (const provided of pack.provides) {
+      if ((await contractImplementations(collectionRoot, provided.id, provided.version)).length === 0) {
+        fail(`${pack.id} provides ${provided.id} ${provided.version} without an implementation.`);
+      }
     }
   } finally {
     await engine?.close?.();

@@ -118,22 +118,13 @@ for (const target of targets) for (const scenario of ["managed", "customized", "
       }
       const result = await reviewedInstall(await engine(await load(target.pack)));
       // An edited seed with no recorded origin (locks written before mdbase spec
-      // 05A) is never merged against a guessed baseline. It is preserved, and as
-      // it still requires the replaced contract the whole upgrade is blocked,
-      // exactly as for any other reference to that contract.
+      // 05A recorded one) merges against the nearest listed baseline, as when
+      // the origin is known (spec 05A, inferred merge base).
       // rc.19 changes the starter's status definitions (their behaviour moved
-      // to the settings record), and a collection that also edited them (here,
-      // colours) conflicts on that list: the upgrade is blocked, the collection
-      // keeps its rc.5 type, and TaskNotes upgrades it itself.
-      const definitionsConflict = target.settingsRecord && scenario === "generator-defaults";
-      const success = !["conflict", "other-reference", "customized-without-origin"].includes(scenario) && !definitionsConflict;
+      // to the settings record); a collection that edited only their colours
+      // keeps them, as the lists merge item by item.
+      const success = !["conflict", "other-reference"].includes(scenario);
       assert.equal(result.valid, success, JSON.stringify(result));
-      if (definitionsConflict) {
-        assert.match(JSON.stringify(result.diagnostics), /binding\/status\/definitions/);
-      }
-      if (scenario === "customized-without-origin") {
-        assert.match(JSON.stringify(result.diagnostics), /tasknotes\.task.{1,4}0\.3\.0-rc\.3/);
-      }
       assert.equal(await readFile(join(root, "task.md"), "utf8"), task);
       if (!success) {
         for (const [path, document] of before) assert.equal(await readFile(join(root, path), "utf8"), document);
@@ -142,7 +133,11 @@ for (const target of targets) for (const scenario of ["managed", "customized", "
         assert.match(upgraded, /assignees/);
         assert.match(upgraded, target.contract);
         if (target.links) assert.match(upgraded, target.links);
-        if (target.minimal) {
+        if (scenario === "generator-defaults") {
+          for (const colour of ["#cccccc", "#808080", "#0066cc"]) assert.match(upgraded, new RegExp(colour));
+          assert.match(upgraded, /cancelled/);
+        }
+        if (target.minimal && !(scenario === "generator-defaults" && target.settingsRecord)) {
           assert.deepEqual(
             withoutAssignees(upgraded, target.settingsRecord),
             withoutAssignees(new Map(before).get("_types/task.md"), target.settingsRecord),
@@ -155,7 +150,7 @@ for (const target of targets) for (const scenario of ["managed", "customized", "
           assert.doesNotMatch(upgraded, /move_on_archive|time_tracking|templating:/);
           await assert.rejects(readFile(join(root, "_settings/dev.tasknotes.md"), "utf8"), { code: "ENOENT" });
         }
-        if (scenario === "customized") {
+        if (scenario === "customized" || scenario === "customized-without-origin") {
           assert.match(upgraded, /title: heading/);
           assert.ok(upgraded.endsWith("Custom documentation.\n"));
         }

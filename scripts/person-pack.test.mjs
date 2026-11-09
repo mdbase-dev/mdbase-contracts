@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { mdbase, packEngine } from "./pack-engine.mjs";
+import { attempt, Collection, contractImplementations, packEngine } from "./pack-engine.mjs";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -9,7 +9,6 @@ import test from "node:test";
 import matter from "gray-matter";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
-const { Collection } = mdbase;
 
 test("the catalog offers only the single-type People starter", async () => {
   const catalog = JSON.parse(await readFile(join(root, "dist/catalog.json"), "utf8"));
@@ -112,23 +111,25 @@ for (const versions of [
       if (hasContact) assert.equal(await readFile(join(collectionRoot, "legacy-contact.md"), "utf8"), legacyContact);
       if (customizedPerson) assert.equal(await readFile(join(collectionRoot, "legacy-person.md"), "utf8"), legacyPerson);
       if (!hasContact) await assert.rejects(readFile(join(collectionRoot, "_types/contact.md")), { code: "ENOENT" });
-      const opened = await Collection.open(collectionRoot);
-      assert.equal(opened.error, undefined);
-      collection = opened.collection;
-      assert.ok(collection);
-      assert.equal(collection.getDataContractImplementations("mdbase.contact", "1.0.0").length, hasContact ? 2 : 1);
-      assert.equal(collection.getDataContractImplementations("mdbase.person", personContract).length, 1);
-      const operations = collection.v03Operations();
+      assert.equal((await contractImplementations(collectionRoot, "mdbase.contact", "1.0.0")).length, hasContact ? 2 : 1);
+      assert.equal((await contractImplementations(collectionRoot, "mdbase.person", personContract)).length, 1);
+      collection = await Collection.open(collectionRoot);
+      const operations = {
+        create: (input) => attempt(() => collection.create(input)),
+        rename: ({ from, to }) => attempt(() => collection.rename(from, to)),
+        update: ({ path, if_revision: ifRevision, patch }) => attempt(() => collection.update(path, { set: patch, ifRevision })),
+      };
       const id = (value) => (personV2 ? {} : { id: value });
       const frontmatter = {
         type: "person", ...id("person_one"), name: "Callum",
         identities: [{ issuer: "https://connect.example", subject: "usr_one" }],
       };
       valid(await operations.create({ path: "people/callum.md", frontmatter }));
-      const duplicate = await operations.create({ path: "people/duplicate.md", frontmatter });
       // Person 2.0.0 has no ID to keep unique; duplicate identity claims are
-      // valid records that consumers must report as ambiguous.
-      assert.equal(duplicate.valid, personV2, "only the 1.x starter rejects duplicate person IDs");
+      // valid records that consumers must report as ambiguous. The 1.x starter's
+      // `unique: id` rule has the default `enforce: report` (spec Chapter 07), so
+      // a duplicate ID is reported, never refused.
+      valid(await operations.create({ path: "people/duplicate.md", frontmatter }));
       valid(await operations.rename({ from: "people/callum.md", to: "contacts/callum.md" }));
       const document = await readFile(join(collectionRoot, "contacts/callum.md"), "utf8");
       assert.match(document, /usr_one/);
@@ -143,7 +144,7 @@ for (const versions of [
           frontmatter: { type: "contact", id: "contact_existing", name: "Existing contact", email: "local@example.com", private_notes: "Collection-owned data" },
         }));
         const converted = valid(await operations.update({
-          path: "contacts/existing.md", if_revision: String(contact.revision),
+          path: "contacts/existing.md", if_revision: contact.revision,
           patch: { type: "person", identities: [{ issuer: "https://connect.example", subject: "existing_account" }] },
         }));
         assert.equal(converted.frontmatter.id, "contact_existing");
@@ -151,7 +152,7 @@ for (const versions of [
         assert.equal(converted.frontmatter.email, "local@example.com");
         assert.equal(converted.frontmatter.private_notes, "Collection-owned data");
         assert.match(await readFile(join(collectionRoot, "contacts/existing.md"), "utf8"), /Keep this \*\*Markdown\*\* body\./);
-        const stale = await operations.update({ path: "contacts/existing.md", if_revision: String(contact.revision), patch: { name: "Stale overwrite" } });
+        const stale = await operations.update({ path: "contacts/existing.md", if_revision: contact.revision, patch: { name: "Stale overwrite" } });
         assert.equal(stale.valid, false, "conversion must not bypass revision checks");
       }
     } finally {

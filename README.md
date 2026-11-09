@@ -84,12 +84,21 @@ MDBASE_SPEC_DIR=../mdbase-spec npm run sync:runtime
 
 ## Build and verify
 
-Requires Node.js 22+ and a built checkout of
-[`@callumalpass/mdbase`](https://github.com/callumalpass/mdbase) (mdbase-ts)
-0.3.0-rc.9 or later (seed upgrade baseline lists). A sibling `../mdbase` checkout is used by default; set
-`MDBASE_TS_DIR` to override it. CI checks out and builds the tag pinned in
-`sources.json` (`typescript_implementation.ref`), which is the single source
-of truth for the mdbase-ts version the catalog is verified against.
+Requires Node.js 22+ and a built `mdbase` package from
+[mdbase-connect](https://github.com/mdbase-dev/mdbase-connect)'s
+`runtime/packages/mdbase`: the same engine core the daemon, the Obsidian plugin
+and the SDK run. A sibling `../mdbase-connect` checkout is used by default; set
+`MDBASE_DIR` to the package folder to override it. Build it from
+`runtime/` with:
+
+```sh
+npm ci --prefix tools/wasm
+cargo xtask mdbase-wasm
+cd packages/mdbase && npm ci && npm run build:native && npm run build
+```
+
+CI builds the commit pinned in `sources.json` (`mdbase_engine.ref`), which is
+the single source of truth for the engine the catalog is verified against.
 
 ```sh
 npm install
@@ -117,20 +126,10 @@ records declared in `collection.links`; Person 2.0.0 drops the separate `id`.
 The People pack 1.2.0 keeps shipping `mdbase.person` 1.0.0 so Person types
 customised under 1.1.0 continue to validate.
 
-Packs are installed through one of two engines. By default every check
-(catalog verification, the People pack tests, and the TaskNotes upgrade and
-plugin-collection tests) installs through mdbase-ts. To run the same checks
-through a Rust-engine mdbase CLI instead:
-
-```sh
-MDBASE_VERIFY_CLI=/absolute/path/to/mdbase npm test
-```
-
-Installed collections are reopened with mdbase-ts either way. CI runs
-`npm test` once per engine, with the CLI built from the commits pinned in
-`sources.json` (`rust_cli`). The CLI's engine must include mdbase-rs 056db73
-(seed upgrade baseline lists); `rust_cli.ref` is the mdbase-connect commit that
-pins that engine revision.
+Every check (catalog verification, the People pack tests, and the TaskNotes
+upgrade and plugin-collection tests) assesses and applies packs through the
+engine's `assessTypePack` and `applyTypePack`, and reopens installed
+collections with its native `Collection`.
 
 ## Seed upgrade baselines
 
