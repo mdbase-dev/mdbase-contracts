@@ -233,6 +233,27 @@ Starter files are named by revision (`types/tasknotes-task/<revision>.md`); a
 revision that does not change the task data keeps the type `version`, so
 collections already at that version upgrade without a version conflict.
 
+## Retained contracts
+
+A type implements one exact contract version, and a type outside a pack's
+targets (a renamed or customised starter, or a collection's own type) is never
+upgraded by that pack. A pack that stops installing a contract an earlier
+version installed leaves such a type invalid, and engines then refuse the whole
+upgrade. The catalog therefore keeps a second invariant, checked by
+`scripts/contract-retention.test.mjs`: every offered (non-hidden) pack installs
+every contract document that any earlier version of the pack shipped,
+including unlisted versions.
+
+rc.12 to rc.18 of the TaskNotes pack managed one contract at
+`_contracts/tasknotes.task.md` and replaced it in place: rc.3 (rc.12), rc.4
+(rc.13, rc.14), then rc.5. rc.19 kept rc.5 there but not the two before it, so
+a collection last set up by rc.12 to rc.14 whose task type is not the starter
+at `_types/task.md` could not be upgraded at all. rc.20 is rc.19 plus rc.3 and
+rc.4 at `_contracts/tasknotes.task/<version>.md`, neither provided; its starter
+and baselines are unchanged, and rc.19 is hidden. Such a type stays valid on
+the contract it implements. TaskNotes reads rc.6 and rc.5 types only, so it
+still needs a type on one of those.
+
 The starter is defined by `@tasknotes/model/starter`, which reproduces the
 published starter byte for byte; `scripts/sync-tasknotes-pack.mjs` generates it
 from there. The upgrade tests check that a new starter changes nothing beyond

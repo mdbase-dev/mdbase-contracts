@@ -271,6 +271,16 @@
     },
     {
       "id": "tasknotes.task",
+      "version": "0.3.0-rc.4",
+      "name": "TaskNotes task",
+      "description": "Portable task data and behavior defined by tasknotes-spec 0.3.0-rc.4.",
+      "contract_type": "record",
+      "digest": "sha256:91165b7664f936bba9289aca984e2638901db7fedf68642ab755e8d0b424e734",
+      "artifact": "./artifacts/contracts/tasknotes.task/0.3.0-rc.4.md",
+      "standards": []
+    },
+    {
+      "id": "tasknotes.task",
       "version": "0.3.0-rc.5",
       "name": "TaskNotes task",
       "description": "Portable task data and behavior defined by tasknotes-spec 0.3.0-rc.5.",
@@ -983,6 +993,58 @@
         }
       ],
       "resource_count": 10,
+      "display": {
+        "name": "TaskNotes tasks",
+        "summary": "Manage portable Markdown tasks, assignments, dates, recurrence, reminders, and time tracking.",
+        "category": "work",
+        "audience": "general",
+        "icon": "square-check-big",
+        "badges": [
+          "TaskNotes compatible"
+        ]
+      },
+      "installation": {
+        "visibility": "hidden",
+        "recommendation": "integration-managed",
+        "primary_type": "task",
+        "caution": "Upgrades the previous starter type while preserving independent customizations. Conflicts block the whole upgrade. TaskNotes moves settings an edited type still holds into its settings record when it upgrades that type.",
+        "types": [
+          {
+            "name": "task",
+            "label": "Task"
+          },
+          {
+            "name": "tasknotes-settings",
+            "label": "Tasknotes settings"
+          }
+        ]
+      }
+    },
+    {
+      "id": "tasknotes.task",
+      "version": "0.3.0-rc.20",
+      "name": "TaskNotes task type pack",
+      "description": "Portable tasks whose app behaviour (templates, archive moves, status cycling, time tracking and link format) lives in a TaskNotes settings record, with a reviewed, atomic upgrade from every TaskNotes starter published before.",
+      "digest": "sha256:59c932775e37782d0ea6e152f2534bd77f535f91ad1edd6b6b7471c2213d0995",
+      "provision": "./packs/tasknotes.task/0.3.0-rc.20.json",
+      "provides": [
+        {
+          "id": "tasknotes.task",
+          "version": "0.3.0-rc.6",
+          "digest": "sha256:c400ead6e218b715d86ad31125bb3d4b2e276817da6ba8065449fd0947b24d67"
+        },
+        {
+          "id": "tasknotes.settings",
+          "version": "1.0.0",
+          "digest": "sha256:a61d55535871d27e9599cb3588148a0590d9e2198d6ee7a0bf3197350b60dc53"
+        },
+        {
+          "id": "mdbase.app-settings",
+          "version": "1.0.0",
+          "digest": "sha256:4ae872a56290e2739ff876df1ca8fdac428753c854d65fd8e8e62045bd643a4e"
+        }
+      ],
+      "resource_count": 12,
       "display": {
         "name": "TaskNotes tasks",
         "summary": "Manage portable Markdown tasks, assignments, dates, recurrence, reminders, and time tracking.",

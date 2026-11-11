@@ -9,7 +9,7 @@ import { packEngine } from "./pack-engine.mjs";
 // TaskNotes 4.13.6 and the 5.0 betas, with default and customized settings).
 // Every TaskNotes pack must install over them, as TaskNotes App does through
 // Connect, without conflicts and without dropping statuses or touching records.
-const LATEST = "0.3.0-rc.19";
+const LATEST = "0.3.0-rc.20";
 const fixtures = new URL("./fixtures/tasknotes-5.0/", import.meta.url);
 
 async function reviewedInstall(engine) {
