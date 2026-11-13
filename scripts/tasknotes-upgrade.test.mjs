@@ -33,6 +33,10 @@ const targets = [
   // rc.19 (tasknotes.task rc.6) moves app behaviour out of the binding into
   // the TaskNotes settings record; nothing else in the starter changes.
   { pack: "0.3.0-rc.19", contract: /0\.3\.0-rc\.6/, links: /assignees\[\]:/, minimal: true, customMapping: true, settingsRecord: true },
+  // rc.20 is rc.19 plus the tasknotes.task contracts earlier packs replaced
+  // in place (rc.3 and rc.4), so a type outside the pack that still implements
+  // one no longer blocks the upgrade.
+  { pack: "0.3.0-rc.20", contract: /0\.3\.0-rc\.6/, links: /assignees\[\]:/, minimal: true, customMapping: true, settingsRecord: true, retainsContracts: true },
 ];
 
 // The binding settings tasknotes.task rc.6 moved to the TaskNotes settings record.
@@ -123,13 +127,23 @@ for (const target of targets) for (const scenario of ["managed", "customized", "
       // rc.19 changes the starter's status definitions (their behaviour moved
       // to the settings record); a collection that edited only their colours
       // keeps them, as the lists merge item by item.
-      const success = !["conflict", "other-reference"].includes(scenario);
+      // A pack that replaces the contract another type implements leaves that
+      // type invalid, so the whole upgrade is refused; rc.20 keeps the contract.
+      const success = scenario !== "conflict" && (scenario !== "other-reference" || target.retainsContracts === true);
       assert.equal(result.valid, success, JSON.stringify(result));
       assert.equal(await readFile(join(root, "task.md"), "utf8"), task);
       if (!success) {
         for (const [path, document] of before) assert.equal(await readFile(join(root, path), "utf8"), document);
       } else {
         const upgraded = await readFile(typePath, "utf8");
+        if (scenario === "other-reference") {
+          // The other type and the exact contract it implements are untouched.
+          assert.equal(await readFile(join(root, "_types/other.md"), "utf8"), oldType.replace("name: task", "name: other"));
+          assert.equal(
+            await readFile(join(root, "_contracts/tasknotes.task/0.3.0-rc.3.md"), "utf8"),
+            new Map(before).get("_contracts/tasknotes.task.md"),
+          );
+        }
         assert.match(upgraded, /assignees/);
         assert.match(upgraded, target.contract);
         if (target.links) assert.match(upgraded, target.links);
