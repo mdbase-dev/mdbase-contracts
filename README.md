@@ -229,6 +229,14 @@ baselines, and rc.18 is hidden. A collection that edited its status
 definitions (for example their colours) conflicts on that list and the
 upgrade is blocked for review; TaskNotes upgrades such a type itself.
 
+rc.21 provides `mdbase.app-settings` 2.0.0 and `tasknotes.settings` 1.1.0 with
+inline schemas, and upgrades the settings starter from v1 to v2. New settings
+records live at `_mdbase/settings/dev.tasknotes.md`. Clients read the legacy
+`_settings/dev.tasknotes.md` only when the new path is absent, save back to the
+record they read, and never move it; `_mdbase/settings` wins when both exist.
+The 1.0.0 contracts and their schemas stay installed for older types, and rc.20
+is hidden.
+
 Starter files are named by revision (`types/tasknotes-task/<revision>.md`); a
 revision that does not change the task data keeps the type `version`, so
 collections already at that version upgrade without a version conflict.
