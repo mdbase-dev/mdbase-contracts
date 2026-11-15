@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { readFile, writeFile, mkdtemp, rm } from "node:fs/promises";
+import { readFile, writeFile, mkdir, mkdtemp, rm } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { parse, stringify } from "yaml";
@@ -16,6 +16,49 @@ async function reviewedInstall(engine) {
   assessment = await engine.assess(adoptions);
   assert.equal(assessment.valid, true, JSON.stringify(assessment));
   return engine.apply(assessment.result.assessment_digest, adoptions);
+}
+
+for (const previous of ["0.3.0-rc.19", "0.3.0-rc.20"]) {
+  test(`TaskNotes ${previous} to rc.21 keeps legacy settings records and independent settings types`, async () => {
+    const root = await mkdtemp(join(tmpdir(), "tasknotes-settings-upgrade-"));
+    const engines = [];
+    try {
+      await writeFile(join(root, "mdbase.yaml"), "spec_version: 0.3.0\nsettings:\n  validation: error\n");
+      async function install(version) {
+        const engine = await packEngine(root, await load(version), "dev.mdbase.tests");
+        engines.push(engine);
+        const result = await reviewedInstall(engine);
+        assert.equal(result.valid, true, JSON.stringify(result));
+        return result.result;
+      }
+      await install(previous);
+      const settingsType = await readFile(join(root, "_types/tasknotes-settings.md"), "utf8");
+      const independent = settingsType.replace("name: tasknotes-settings", "name: other-settings");
+      await writeFile(join(root, "_types/other-settings.md"), independent);
+      const retainedPaths = [
+        "_contracts/mdbase.app-settings/1.0.0.md",
+        "_contracts/tasknotes.settings/1.0.0.md",
+        "schemas/mdbase.app-settings/1.0.0.schema.json",
+        "schemas/tasknotes.settings/1.0.0.schema.json",
+      ];
+      const retained = await Promise.all(retainedPaths.map(async (path) => [path, await readFile(join(root, path), "utf8")]));
+      const record = "---\ntype: tasknotes-settings\napp: dev.tasknotes\nscope: collection\nsettings_version: 1\ntemplate_enabled: true\nlocal_setting: keep\n---\nCollection documentation.\n";
+      await mkdir(join(root, "_settings"));
+      await writeFile(join(root, "_settings/dev.tasknotes.md"), record);
+
+      const result = await install("0.3.0-rc.21");
+      assert.equal(result.resources.find(({ target }) => target === "_types/tasknotes-settings.md").action, "update");
+      assert.equal(await readFile(join(root, "_types/tasknotes-settings.md"), "utf8"),
+        await readFile(new URL("../types/tasknotes-settings/2.md", import.meta.url), "utf8"));
+      assert.equal(await readFile(join(root, "_types/other-settings.md"), "utf8"), independent);
+      assert.equal(await readFile(join(root, "_settings/dev.tasknotes.md"), "utf8"), record);
+      await assert.rejects(readFile(join(root, "_mdbase/settings/dev.tasknotes.md")), { code: "ENOENT" });
+      for (const [path, document] of retained) assert.equal(await readFile(join(root, path), "utf8"), document);
+    } finally {
+      await Promise.all(engines.map((engine) => engine.close()));
+      await rm(root, { recursive: true, force: true });
+    }
+  });
 }
 
 const targets = [
@@ -37,6 +80,8 @@ const targets = [
   // in place (rc.3 and rc.4), so a type outside the pack that still implements
   // one no longer blocks the upgrade.
   { pack: "0.3.0-rc.20", contract: /0\.3\.0-rc\.6/, links: /assignees\[\]:/, minimal: true, customMapping: true, settingsRecord: true, retainsContracts: true },
+  // rc.21 moves new settings records under _mdbase/settings and upgrades the settings type.
+  { pack: "0.3.0-rc.21", contract: /0\.3\.0-rc\.6/, links: /assignees\[\]:/, minimal: true, customMapping: true, settingsRecord: true, retainsContracts: true },
 ];
 
 // The binding settings tasknotes.task rc.6 moved to the TaskNotes settings record.
@@ -163,6 +208,7 @@ for (const target of targets) for (const scenario of ["managed", "customized", "
           assert.match(await readFile(join(root, "_types/tasknotes-settings.md"), "utf8"), /tasknotes\.settings/);
           assert.doesNotMatch(upgraded, /move_on_archive|time_tracking|templating:/);
           await assert.rejects(readFile(join(root, "_settings/dev.tasknotes.md"), "utf8"), { code: "ENOENT" });
+          await assert.rejects(readFile(join(root, "_mdbase/settings/dev.tasknotes.md"), "utf8"), { code: "ENOENT" });
         }
         if (scenario === "customized" || scenario === "customized-without-origin") {
           assert.match(upgraded, /title: heading/);

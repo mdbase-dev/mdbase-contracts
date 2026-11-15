@@ -9,7 +9,7 @@ import { packEngine } from "./pack-engine.mjs";
 // TaskNotes 4.13.6 and the 5.0 betas, with default and customized settings).
 // Every TaskNotes pack must install over them, as TaskNotes App does through
 // Connect, without conflicts and without dropping statuses or touching records.
-const LATEST = "0.3.0-rc.20";
+const LATEST = "0.3.0-rc.21";
 const fixtures = new URL("./fixtures/tasknotes-5.0/", import.meta.url);
 
 async function reviewedInstall(engine) {
@@ -61,7 +61,8 @@ for (const name of (await readdir(fixtures)).filter((file) => file.endsWith(".js
         assert.match(await readFile(join(root, "_contracts/tasknotes.task.md"), "utf8"), /version: 0\.3\.0-rc\.5/);
       }
       if (files["_types/task.md"].includes("- cancelled")) assert.match(type, /- cancelled/);
-      assert.match(await readFile(join(root, "_types/tasknotes-settings.md"), "utf8"), /name: tasknotes-settings/);
+      assert.equal(await readFile(join(root, "_types/tasknotes-settings.md"), "utf8"),
+        provision.resources.find(({ source }) => source === "types/tasknotes-settings/2.md").document);
       for (const path of Object.keys(files).filter((path) => !path.startsWith("_") && !path.startsWith("mdbase"))) {
         assert.equal(await readFile(join(root, path), "utf8"), files[path], path);
       }
