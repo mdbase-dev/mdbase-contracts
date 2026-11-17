@@ -1,10 +1,4 @@
-import {
-  cp,
-  mkdir,
-  readFile,
-  rm,
-  writeFile
-} from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parse, stringify } from "yaml";
@@ -13,53 +7,49 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const specRoot = resolve(
   process.env.MDBASE_SPEC_DIR ?? join(root, "..", "mdbase-spec")
 );
-const sourceRoot = join(specRoot, "standard-packs/mdbase-runtime/0.2.0");
+// Published artifacts are immutable: this imports the current pack version
+// alongside earlier ones and refuses to overwrite a differing existing file.
+const PACK_VERSION = "0.2.1";
+// Type snapshots are versioned so earlier packs keep their published sources.
+const TYPE_DIR = "types/mdbase-runtime/v2";
+const sourceRoot = join(specRoot, `standard-packs/mdbase-runtime/${PACK_VERSION}`);
 const manifest = parse(await readFile(join(sourceRoot, "mdbase-pack.yaml"), "utf8"));
 
 if (
   manifest.kind !== "mdbase.type-pack"
   || manifest.id !== "mdbase.runtime.standard"
-  || manifest.version !== "0.2.0"
+  || manifest.version !== PACK_VERSION
 ) {
-  throw new Error("The source is not mdbase.runtime.standard 0.2.0.");
+  throw new Error(`The source is not mdbase.runtime.standard ${PACK_VERSION}.`);
 }
 
-const runtimeContractIds = manifest.resources
-  .filter(({ kind }) => kind === "contract")
-  .map(({ source }) => source.split("/")[1]);
 const runtimeRecordIds = [];
+const recordContractVersions = new Map();
 for (const resource of manifest.resources.filter(({ kind }) => kind === "contract")) {
   const document = await readFile(join(sourceRoot, resource.source), "utf8");
   const frontmatter = parseFrontmatter(document, resource.source).frontmatter;
   if (frontmatter.contract_type === "record") {
     runtimeRecordIds.push(frontmatter.id);
+    recordContractVersions.set(frontmatter.id, frontmatter.version);
   }
 }
-const runtimeSchemaIds = manifest.resources
-  .filter(({ kind }) => kind === "schema")
-  .map(({ source }) => source.split("/")[1]);
-
-for (const id of new Set(runtimeContractIds)) {
-  await rm(join(root, "contracts", id), { recursive: true, force: true });
-}
-for (const id of new Set(runtimeSchemaIds)) {
-  await rm(join(root, "schemas", id), { recursive: true, force: true });
-}
-await rm(join(root, "types/mdbase-runtime"), { recursive: true, force: true });
-
 const resources = [];
 for (const resource of manifest.resources) {
   const source = catalogSource(resource);
   const from = join(sourceRoot, resource.source);
   const to = join(root, source);
   await mkdir(dirname(to), { recursive: true });
-  if (resource.kind === "type") {
-    await writeFile(to, await editableTypeSnapshot(from), "utf8");
-  } else {
-    await cp(from, to);
+  const contents = resource.kind === "type"
+    ? await editableTypeSnapshot(from)
+    : await readFile(from, "utf8");
+  const existing = await readFile(to, "utf8").catch(() => null);
+  if (existing !== null && existing !== contents) {
+    throw new Error(`${source} already exists with different content; publish a new version instead.`);
   }
+  await writeFile(to, contents, "utf8");
   resources.push({
     kind: resource.kind,
+    mode: resource.mode,
     source,
     target: resource.target
   });
@@ -90,10 +80,10 @@ const definition = {
   // declarations say which sources/providers actually supply them.
   provides: [...new Set(runtimeRecordIds)]
     .sort()
-    .map((id) => ({ id, version: "1.0.0" })),
+    .map((id) => ({ id, version: recordContractVersions.get(id) })),
   resources
 };
-const packPath = join(root, "packs/mdbase.runtime.standard/0.2.0.pack.yaml");
+const packPath = join(root, `packs/mdbase.runtime.standard/${PACK_VERSION}.pack.yaml`);
 await mkdir(dirname(packPath), { recursive: true });
 await writeFile(packPath, stringify(definition, { lineWidth: 0 }), "utf8");
 
@@ -129,7 +119,7 @@ function catalogSource(resource) {
     return resource.source.replace(/^_contracts\//u, "contracts/");
   }
   if (resource.kind === "type") {
-    return resource.source.replace(/^_types\//u, "types/mdbase-runtime/");
+    return resource.source.replace(/^_types\//u, `${TYPE_DIR}/`);
   }
   return resource.source;
 }

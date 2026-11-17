@@ -1,0 +1,292 @@
+kind: mdbase.catalog-pack
+id: mdbase.runtime.standard
+version: 0.2.1
+name: mdbase durable runtime standard library
+description: Runtime record implementations and inspectable built-in event/action contracts.
+display:
+  name: Runtime standard library
+  summary: Internal records and contracts for durable workflows, runs, timers, and diagnostics.
+  category: infrastructure
+  audience: infrastructure
+  icon: terminal-window
+  badges:
+    - Runtime 0.2
+installation:
+  visibility: advanced
+  recommendation: integration-managed
+  primary_type: null
+  caution: Most collections do not need this pack. Install it only when a runtime integration asks you to.
+provides:
+  - id: mdbase.runtime.action-attempt
+    version: 1.0.0
+  - id: mdbase.runtime.capability-grant
+    version: 1.0.0
+  - id: mdbase.runtime.checkpoint
+    version: 1.0.0
+  - id: mdbase.runtime.dead-letter
+    version: 1.0.0
+  - id: mdbase.runtime.diagnostic
+    version: 1.0.0
+  - id: mdbase.runtime.policy
+    version: 1.0.0
+  - id: mdbase.runtime.provider-registration
+    version: 1.0.0
+  - id: mdbase.runtime.run
+    version: 1.0.0
+  - id: mdbase.runtime.timer
+    version: 1.0.0
+  - id: mdbase.runtime.workflow
+    version: 1.0.0
+resources:
+  - kind: schema
+    mode: managed
+    source: schemas/mdbase.runtime.workflow/1.1.0.schema.json
+    target: schemas/mdbase.runtime.workflow/1.1.0.schema.json
+  - kind: contract
+    mode: managed
+    source: contracts/mdbase.runtime.workflow/1.1.0.md
+    target: _contracts/mdbase.runtime.workflow/1.1.0.md
+  - kind: type
+    mode: managed
+    source: types/mdbase-runtime/v2/workflow.md
+    target: _types/workflow.md
+  - kind: schema
+    mode: managed
+    source: schemas/mdbase.runtime.policy/1.1.0.schema.json
+    target: schemas/mdbase.runtime.policy/1.1.0.schema.json
+  - kind: contract
+    mode: managed
+    source: contracts/mdbase.runtime.policy/1.1.0.md
+    target: _contracts/mdbase.runtime.policy/1.1.0.md
+  - kind: type
+    mode: managed
+    source: types/mdbase-runtime/v2/policy.md
+    target: _types/policy.md
+  - kind: schema
+    mode: managed
+    source: schemas/mdbase.runtime.provider-registration/1.1.0.schema.json
+    target: schemas/mdbase.runtime.provider-registration/1.1.0.schema.json
+  - kind: contract
+    mode: managed
+    source: contracts/mdbase.runtime.provider-registration/1.1.0.md
+    target: _contracts/mdbase.runtime.provider-registration/1.1.0.md
+  - kind: type
+    mode: managed
+    source: types/mdbase-runtime/v2/provider-registration.md
+    target: _types/provider-registration.md
+  - kind: schema
+    mode: managed
+    source: schemas/mdbase.runtime.capability-grant/1.1.0.schema.json
+    target: schemas/mdbase.runtime.capability-grant/1.1.0.schema.json
+  - kind: contract
+    mode: managed
+    source: contracts/mdbase.runtime.capability-grant/1.1.0.md
+    target: _contracts/mdbase.runtime.capability-grant/1.1.0.md
+  - kind: type
+    mode: managed
+    source: types/mdbase-runtime/v2/capability-grant.md
+    target: _types/capability-grant.md
+  - kind: schema
+    mode: managed
+    source: schemas/mdbase.runtime.run/1.1.0.schema.json
+    target: schemas/mdbase.runtime.run/1.1.0.schema.json
+  - kind: contract
+    mode: managed
+    source: contracts/mdbase.runtime.run/1.1.0.md
+    target: _contracts/mdbase.runtime.run/1.1.0.md
+  - kind: type
+    mode: managed
+    source: types/mdbase-runtime/v2/run.md
+    target: _types/run.md
+  - kind: schema
+    mode: managed
+    source: schemas/mdbase.runtime.action-attempt/1.1.0.schema.json
+    target: schemas/mdbase.runtime.action-attempt/1.1.0.schema.json
+  - kind: contract
+    mode: managed
+    source: contracts/mdbase.runtime.action-attempt/1.1.0.md
+    target: _contracts/mdbase.runtime.action-attempt/1.1.0.md
+  - kind: type
+    mode: managed
+    source: types/mdbase-runtime/v2/action-attempt.md
+    target: _types/action-attempt.md
+  - kind: schema
+    mode: managed
+    source: schemas/mdbase.runtime.checkpoint/1.1.0.schema.json
+    target: schemas/mdbase.runtime.checkpoint/1.1.0.schema.json
+  - kind: contract
+    mode: managed
+    source: contracts/mdbase.runtime.checkpoint/1.1.0.md
+    target: _contracts/mdbase.runtime.checkpoint/1.1.0.md
+  - kind: type
+    mode: managed
+    source: types/mdbase-runtime/v2/checkpoint.md
+    target: _types/checkpoint.md
+  - kind: schema
+    mode: managed
+    source: schemas/mdbase.runtime.timer/1.1.0.schema.json
+    target: schemas/mdbase.runtime.timer/1.1.0.schema.json
+  - kind: contract
+    mode: managed
+    source: contracts/mdbase.runtime.timer/1.1.0.md
+    target: _contracts/mdbase.runtime.timer/1.1.0.md
+  - kind: type
+    mode: managed
+    source: types/mdbase-runtime/v2/timer.md
+    target: _types/timer.md
+  - kind: schema
+    mode: managed
+    source: schemas/mdbase.runtime.diagnostic/1.1.0.schema.json
+    target: schemas/mdbase.runtime.diagnostic/1.1.0.schema.json
+  - kind: contract
+    mode: managed
+    source: contracts/mdbase.runtime.diagnostic/1.1.0.md
+    target: _contracts/mdbase.runtime.diagnostic/1.1.0.md
+  - kind: type
+    mode: managed
+    source: types/mdbase-runtime/v2/diagnostic.md
+    target: _types/diagnostic.md
+  - kind: schema
+    mode: managed
+    source: schemas/mdbase.runtime.dead-letter/1.1.0.schema.json
+    target: schemas/mdbase.runtime.dead-letter/1.1.0.schema.json
+  - kind: contract
+    mode: managed
+    source: contracts/mdbase.runtime.dead-letter/1.1.0.md
+    target: _contracts/mdbase.runtime.dead-letter/1.1.0.md
+  - kind: type
+    mode: managed
+    source: types/mdbase-runtime/v2/dead-letter.md
+    target: _types/dead-letter.md
+  - kind: schema
+    mode: managed
+    source: schemas/mdbase.record.created/1.0.0.schema.json
+    target: schemas/mdbase.record.created/1.0.0.schema.json
+  - kind: contract
+    mode: managed
+    source: contracts/mdbase.record.created/1.0.0.md
+    target: _contracts/mdbase.record.created/1.0.0.md
+  - kind: schema
+    mode: managed
+    source: schemas/mdbase.record.modified/1.0.0.schema.json
+    target: schemas/mdbase.record.modified/1.0.0.schema.json
+  - kind: contract
+    mode: managed
+    source: contracts/mdbase.record.modified/1.0.0.md
+    target: _contracts/mdbase.record.modified/1.0.0.md
+  - kind: schema
+    mode: managed
+    source: schemas/mdbase.record.deleted/1.0.0.schema.json
+    target: schemas/mdbase.record.deleted/1.0.0.schema.json
+  - kind: contract
+    mode: managed
+    source: contracts/mdbase.record.deleted/1.0.0.md
+    target: _contracts/mdbase.record.deleted/1.0.0.md
+  - kind: schema
+    mode: managed
+    source: schemas/mdbase.record.renamed/1.0.0.schema.json
+    target: schemas/mdbase.record.renamed/1.0.0.schema.json
+  - kind: contract
+    mode: managed
+    source: contracts/mdbase.record.renamed/1.0.0.md
+    target: _contracts/mdbase.record.renamed/1.0.0.md
+  - kind: schema
+    mode: managed
+    source: schemas/mdbase.runtime.timer.fired/1.0.0.schema.json
+    target: schemas/mdbase.runtime.timer.fired/1.0.0.schema.json
+  - kind: contract
+    mode: managed
+    source: contracts/mdbase.runtime.timer.fired/1.0.0.md
+    target: _contracts/mdbase.runtime.timer.fired/1.0.0.md
+  - kind: schema
+    mode: managed
+    source: schemas/mdbase.runtime.run.cancel/1.0.0.output.schema.json
+    target: schemas/mdbase.runtime.run.cancel/1.0.0.output.schema.json
+  - kind: schema
+    mode: managed
+    source: schemas/mdbase.runtime.run.cancel/1.0.0.schema.json
+    target: schemas/mdbase.runtime.run.cancel/1.0.0.schema.json
+  - kind: contract
+    mode: managed
+    source: contracts/mdbase.runtime.run.cancel/1.0.0.md
+    target: _contracts/mdbase.runtime.run.cancel/1.0.0.md
+  - kind: schema
+    mode: managed
+    source: schemas/mdbase.runtime.workflow/1.0.0.schema.json
+    target: schemas/mdbase.runtime.workflow/1.0.0.schema.json
+  - kind: contract
+    mode: managed
+    source: contracts/mdbase.runtime.workflow/1.0.0.md
+    target: _contracts/mdbase.runtime.workflow/1.0.0.md
+  - kind: schema
+    mode: managed
+    source: schemas/mdbase.runtime.policy/1.0.0.schema.json
+    target: schemas/mdbase.runtime.policy/1.0.0.schema.json
+  - kind: contract
+    mode: managed
+    source: contracts/mdbase.runtime.policy/1.0.0.md
+    target: _contracts/mdbase.runtime.policy/1.0.0.md
+  - kind: schema
+    mode: managed
+    source: schemas/mdbase.runtime.provider-registration/1.0.0.schema.json
+    target: schemas/mdbase.runtime.provider-registration/1.0.0.schema.json
+  - kind: contract
+    mode: managed
+    source: contracts/mdbase.runtime.provider-registration/1.0.0.md
+    target: _contracts/mdbase.runtime.provider-registration/1.0.0.md
+  - kind: schema
+    mode: managed
+    source: schemas/mdbase.runtime.capability-grant/1.0.0.schema.json
+    target: schemas/mdbase.runtime.capability-grant/1.0.0.schema.json
+  - kind: contract
+    mode: managed
+    source: contracts/mdbase.runtime.capability-grant/1.0.0.md
+    target: _contracts/mdbase.runtime.capability-grant/1.0.0.md
+  - kind: schema
+    mode: managed
+    source: schemas/mdbase.runtime.run/1.0.0.schema.json
+    target: schemas/mdbase.runtime.run/1.0.0.schema.json
+  - kind: contract
+    mode: managed
+    source: contracts/mdbase.runtime.run/1.0.0.md
+    target: _contracts/mdbase.runtime.run/1.0.0.md
+  - kind: schema
+    mode: managed
+    source: schemas/mdbase.runtime.action-attempt/1.0.0.schema.json
+    target: schemas/mdbase.runtime.action-attempt/1.0.0.schema.json
+  - kind: contract
+    mode: managed
+    source: contracts/mdbase.runtime.action-attempt/1.0.0.md
+    target: _contracts/mdbase.runtime.action-attempt/1.0.0.md
+  - kind: schema
+    mode: managed
+    source: schemas/mdbase.runtime.checkpoint/1.0.0.schema.json
+    target: schemas/mdbase.runtime.checkpoint/1.0.0.schema.json
+  - kind: contract
+    mode: managed
+    source: contracts/mdbase.runtime.checkpoint/1.0.0.md
+    target: _contracts/mdbase.runtime.checkpoint/1.0.0.md
+  - kind: schema
+    mode: managed
+    source: schemas/mdbase.runtime.timer/1.0.0.schema.json
+    target: schemas/mdbase.runtime.timer/1.0.0.schema.json
+  - kind: contract
+    mode: managed
+    source: contracts/mdbase.runtime.timer/1.0.0.md
+    target: _contracts/mdbase.runtime.timer/1.0.0.md
+  - kind: schema
+    mode: managed
+    source: schemas/mdbase.runtime.diagnostic/1.0.0.schema.json
+    target: schemas/mdbase.runtime.diagnostic/1.0.0.schema.json
+  - kind: contract
+    mode: managed
+    source: contracts/mdbase.runtime.diagnostic/1.0.0.md
+    target: _contracts/mdbase.runtime.diagnostic/1.0.0.md
+  - kind: schema
+    mode: managed
+    source: schemas/mdbase.runtime.dead-letter/1.0.0.schema.json
+    target: schemas/mdbase.runtime.dead-letter/1.0.0.schema.json
+  - kind: contract
+    mode: managed
+    source: contracts/mdbase.runtime.dead-letter/1.0.0.md
+    target: _contracts/mdbase.runtime.dead-letter/1.0.0.md

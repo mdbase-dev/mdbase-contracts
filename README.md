@@ -23,6 +23,14 @@ standard library: ten ordinary record contracts and canonical implementing
 types, the four canonical record-change events, and inspectable timer-event
 and cancellation-action artifacts.
 Installing it is passive and grants no execution authority.
+Pack 0.2.1 carries record contracts 1.1.0 and canonical types v2, which leave
+the type key to the collection like the starters below: the 1.0.0 schemas
+required and pinned `type: runtime_*` and rejected other top-level fields, so
+runtime records were invalid in collections that declare types with
+`mdbase_type`. Every 1.0.0-valid record stays valid under 1.1.0. Pack 0.2.0 is
+hidden from the catalog; its artifacts stay byte-identical at their versioned
+paths. 0.2.1 also gives every resource an explicit `managed` mode, which 0.2.0
+omitted.
 
 The `mdbase.contact` 1.2.0 pack offers one **Person** starter with portable IDs,
 editable issuer/subject account associations, and optional contact details. It
@@ -87,7 +95,9 @@ dist/                              deterministic publication artifact
 
 The runtime pack is generated in `mdbase-spec`. Contract and schema artifacts
 are imported byte-for-byte; its referenced canonical types are materialized as
-editable inline schema snapshots for the catalog:
+editable inline schema snapshots under `types/mdbase-runtime/v2/` for the
+catalog. The importer adds the current pack version beside earlier ones and
+refuses to overwrite a differing existing artifact:
 
 ```sh
 MDBASE_SPEC_DIR=../mdbase-spec npm run sync:runtime
