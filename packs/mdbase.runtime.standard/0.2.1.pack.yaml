@@ -18,25 +18,25 @@ installation:
   caution: Most collections do not need this pack. Install it only when a runtime integration asks you to.
 provides:
   - id: mdbase.runtime.action-attempt
-    version: 1.0.0
+    version: 1.1.0
   - id: mdbase.runtime.capability-grant
-    version: 1.0.0
+    version: 1.1.0
   - id: mdbase.runtime.checkpoint
-    version: 1.0.0
+    version: 1.1.0
   - id: mdbase.runtime.dead-letter
-    version: 1.0.0
+    version: 1.1.0
   - id: mdbase.runtime.diagnostic
-    version: 1.0.0
+    version: 1.1.0
   - id: mdbase.runtime.policy
-    version: 1.0.0
+    version: 1.1.0
   - id: mdbase.runtime.provider-registration
-    version: 1.0.0
+    version: 1.1.0
   - id: mdbase.runtime.run
-    version: 1.0.0
+    version: 1.1.0
   - id: mdbase.runtime.timer
-    version: 1.0.0
+    version: 1.1.0
   - id: mdbase.runtime.workflow
-    version: 1.0.0
+    version: 1.1.0
 resources:
   - kind: schema
     mode: managed

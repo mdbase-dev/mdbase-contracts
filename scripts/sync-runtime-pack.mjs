@@ -23,14 +23,15 @@ if (
   throw new Error(`The source is not mdbase.runtime.standard ${PACK_VERSION}.`);
 }
 
+// The pack provides the record contract versions its types implement; it also
+// installs earlier versions so collection types that still implement them stay valid.
 const runtimeRecordIds = [];
 const recordContractVersions = new Map();
-for (const resource of manifest.resources.filter(({ kind }) => kind === "contract")) {
+for (const resource of manifest.resources.filter(({ kind }) => kind === "type")) {
   const document = await readFile(join(sourceRoot, resource.source), "utf8");
-  const frontmatter = parseFrontmatter(document, resource.source).frontmatter;
-  if (frontmatter.contract_type === "record") {
-    runtimeRecordIds.push(frontmatter.id);
-    recordContractVersions.set(frontmatter.id, frontmatter.version);
+  for (const { contract, version } of parseFrontmatter(document, resource.source).frontmatter.implements ?? []) {
+    runtimeRecordIds.push(contract);
+    recordContractVersions.set(contract, version);
   }
 }
 const resources = [];
