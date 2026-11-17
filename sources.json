@@ -1,7 +1,7 @@
 {
   "runtime_standard_pack": {
     "repository": "mdbase-dev/mdbase-spec",
-    "ref": "92f0032a086cc265d3415189cbf6245e369b13c4"
+    "ref": "13531d8d2ad7344d45d0eb15124e731e07ee76c4"
   },
   "mdbase_engine": {
     "repository": "mdbase-dev/mdbase-connect",

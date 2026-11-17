@@ -1,0 +1,166 @@
+---
+kind: mdbase.type
+name: runtime_dead_letter
+version: 2
+description: Canonical Markdown implementation of mdbase.runtime.dead-letter.
+match:
+  where:
+    type: runtime_dead_letter
+schema:
+  dialect: json-schema-2020-12
+  value:
+    $schema: https://json-schema.org/draft/2020-12/schema
+    title: mdbase durable runtime dead letter
+    type: object
+    required:
+      - id
+      - reason
+      - status
+      - evidence
+      - created_at
+    properties:
+      id:
+        type: string
+        pattern: ^[A-Za-z][A-Za-z0-9._:-]*$
+      reason:
+        type: string
+        pattern: ^[A-Za-z][A-Za-z0-9._:-]*$
+      status:
+        enum:
+          - unresolved
+          - acknowledged
+          - requeued
+      evidence_kind:
+        enum:
+          - event
+          - action_request
+          - action_outcome
+      evidence:
+        type: object
+      created_at:
+        type: string
+        format: date-time
+      acknowledged_at:
+        type: string
+        format: date-time
+    $defs:
+      identifier:
+        type: string
+        pattern: ^[A-Za-z][A-Za-z0-9._:-]*$
+      semanticVersion:
+        type: string
+        pattern: ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$
+      digest:
+        type: string
+        pattern: ^sha256:[0-9a-f]{64}$
+      dateTime:
+        type: string
+        format: date-time
+      contractRequirement:
+        type: object
+        required:
+          - id
+          - version
+        properties:
+          id:
+            type: string
+            pattern: ^[A-Za-z][A-Za-z0-9._:-]*$
+          version:
+            type: string
+            minLength: 1
+          digest:
+            type: string
+            pattern: ^sha256:[0-9a-f]{64}$
+        patternProperties:
+          ^x-[A-Za-z0-9._:-]+$: true
+        additionalProperties: false
+      exactContractReference:
+        type: object
+        required:
+          - id
+          - version
+          - digest
+        properties:
+          id:
+            type: string
+            pattern: ^[A-Za-z][A-Za-z0-9._:-]*$
+          version:
+            type: string
+            pattern: ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$
+          digest:
+            type: string
+            pattern: ^sha256:[0-9a-f]{64}$
+        patternProperties:
+          ^x-[A-Za-z0-9._:-]+$: true
+        additionalProperties: false
+      identity:
+        type: object
+        required:
+          - application
+          - implementation
+          - version
+        properties:
+          application:
+            type: string
+            pattern: ^[A-Za-z][A-Za-z0-9._:-]*$
+          implementation:
+            type: string
+            pattern: ^[A-Za-z][A-Za-z0-9._:-]*$
+          version:
+            type: string
+            pattern: ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$
+          instance_id:
+            type: string
+            minLength: 1
+        patternProperties:
+          ^x-[A-Za-z0-9._:-]+$: true
+        additionalProperties: false
+      providerSelector:
+        type: object
+        required: []
+        properties:
+          application:
+            type: string
+            pattern: ^[A-Za-z][A-Za-z0-9._:-]*$
+          implementation:
+            type: string
+            pattern: ^[A-Za-z][A-Za-z0-9._:-]*$
+          instance_id:
+            type: string
+            minLength: 1
+        patternProperties:
+          ^x-[A-Za-z0-9._:-]+$: true
+        additionalProperties: false
+        minProperties: 1
+      expression:
+        type: object
+        required:
+          - $expr
+        properties:
+          $expr:
+            type: string
+            minLength: 1
+        additionalProperties: false
+    $id: https://mdbase.dev/schemas/runtime/v0.2/mdbase.runtime.dead-letter/1.1.0.schema.json
+implements:
+  - contract: mdbase.runtime.dead-letter
+    version: 1.1.0
+    fields:
+      id: id
+      reason: reason
+      status: status
+      evidence_kind: evidence_kind
+      evidence: evidence
+      created_at: created_at
+      acknowledged_at: acknowledged_at
+---
+
+# Runtime dead letter
+
+This canonical type makes `runtime_dead_letter` records discoverable through
+the ordinary mdbase record-contract registry.
+
+Apps create these records by naming the type; the engine writes it under the
+collection's configured explicit type key. The `match` rule also
+recognises hand-written `type: runtime_dead_letter` records in collections
+whose type key is something else.

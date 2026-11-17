@@ -12,7 +12,7 @@ display:
   badges:
     - Runtime 0.2
 installation:
-  visibility: advanced
+  visibility: hidden
   recommendation: integration-managed
   primary_type: null
   caution: Most collections do not need this pack. Install it only when a runtime integration asks you to.
