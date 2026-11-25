@@ -60,6 +60,16 @@
       "standards": []
     },
     {
+      "id": "mdbase.memory",
+      "version": "1.0.0",
+      "name": "Memory",
+      "description": "One thing an AI assistant should remember about the person it works for, shared by every assistant that reaches the collection.",
+      "contract_type": "record",
+      "digest": "sha256:09d16184787c403222d33ff0449569f664e3d12bd83c5368e2de1adbae93a52f",
+      "artifact": "./artifacts/contracts/mdbase.memory/1.0.0.md",
+      "standards": []
+    },
+    {
       "id": "mdbase.person",
       "version": "1.0.0",
       "name": "Person",
@@ -740,6 +750,44 @@
           {
             "name": "daily-note",
             "label": "Daily note"
+          }
+        ]
+      }
+    },
+    {
+      "id": "mdbase.memory",
+      "version": "1.0.0",
+      "name": "Memories",
+      "description": "The mdbase.memory contract and an editable Memory type that AI assistants share.",
+      "digest": "sha256:c6453eaeea05efef616ad4282e131ad933535c9a1cb1df6fa0859e36541df2cd",
+      "provision": "./packs/mdbase.memory/1.0.0.json",
+      "provides": [
+        {
+          "id": "mdbase.memory",
+          "version": "1.0.0",
+          "digest": "sha256:0db69a68f706a216c3cf133af84dd600928c3637d49d51b707b499ddb7407bd6"
+        }
+      ],
+      "resource_count": 3,
+      "display": {
+        "name": "Memories",
+        "summary": "Keep what your AI assistants remember about you in one place that Claude, ChatGPT and others all read and update.",
+        "category": "other",
+        "audience": "general",
+        "icon": "brain",
+        "badges": [
+          "Shared AI memory"
+        ]
+      },
+      "installation": {
+        "visibility": "default",
+        "recommendation": "optional",
+        "primary_type": "memory",
+        "caution": "Requires an mdbase engine with path-stored fields (mdbase 0.3.0-rc.6). Older engines reject the Memory type, which keeps each memory's name in its file name.",
+        "types": [
+          {
+            "name": "memory",
+            "label": "Memory"
           }
         ]
       }

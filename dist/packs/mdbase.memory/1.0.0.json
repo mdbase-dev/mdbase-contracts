@@ -1,0 +1,53 @@
+{
+  "manifest": {
+    "kind": "mdbase.type-pack",
+    "id": "mdbase.memory",
+    "version": "1.0.0",
+    "name": "Memories",
+    "description": "The mdbase.memory contract and an editable Memory type that AI assistants share.",
+    "resources": [
+      {
+        "kind": "schema",
+        "mode": "managed",
+        "source": "schemas/mdbase.memory/1.0.0.schema.json",
+        "target": "schemas/mdbase.memory/1.0.0.schema.json",
+        "digest": "sha256:0bd047f3bed5016aaddcfdd82ff6afabe3c6e45f77a6722e039b693b547c9038"
+      },
+      {
+        "kind": "contract",
+        "mode": "managed",
+        "source": "contracts/mdbase.memory/1.0.0.md",
+        "target": "_contracts/mdbase.memory/1.0.0.md",
+        "digest": "sha256:09d16184787c403222d33ff0449569f664e3d12bd83c5368e2de1adbae93a52f"
+      },
+      {
+        "kind": "type",
+        "mode": "seed",
+        "source": "types/memory/1.md",
+        "target": "_types/memory.md",
+        "digest": "sha256:29578f3826f9e5d20a54246ccb2a8ac8e7e3bfda72358721c319188f40cddee9"
+      }
+    ]
+  },
+  "resources": [
+    {
+      "source": "schemas/mdbase.memory/1.0.0.schema.json",
+      "document": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"$id\": \"https://mdbase.dev/contracts/schemas/mdbase.memory/1.0.0.schema.json\",\n  \"title\": \"Memory\",\n  \"description\": \"One thing an AI assistant should remember about the person it works for. The Markdown body is the memory itself.\",\n  \"type\": \"object\",\n  \"required\": [\n    \"name\",\n    \"description\",\n    \"kind\"\n  ],\n  \"properties\": {\n    \"name\": {\n      \"type\": \"string\",\n      \"pattern\": \"^[a-z0-9]+(-[a-z0-9]+)*$\",\n      \"maxLength\": 80,\n      \"description\": \"Short kebab-case identifier for the memory, unique in the collection.\"\n    },\n    \"description\": {\n      \"type\": \"string\",\n      \"minLength\": 1,\n      \"maxLength\": 200,\n      \"description\": \"One line saying what the memory is about, specific enough to decide from it alone whether to read it.\"\n    },\n    \"kind\": {\n      \"enum\": [\n        \"user\",\n        \"feedback\",\n        \"project\",\n        \"reference\"\n      ],\n      \"description\": \"user: who the person is. feedback: how they want assistants to work. project: ongoing work, goals and dates. reference: where to find things.\"\n    },\n    \"by\": {\n      \"type\": \"string\",\n      \"minLength\": 1,\n      \"maxLength\": 80,\n      \"description\": \"The assistant that saved or last changed the memory, such as Claude, ChatGPT or Codex.\"\n    }\n  },\n  \"additionalProperties\": false\n}\n"
+    },
+    {
+      "source": "contracts/mdbase.memory/1.0.0.md",
+      "document": "---\nkind: mdbase.contract\ncontract_type: record\nid: mdbase.memory\nversion: 1.0.0\nname: Memory\ndescription: One thing an AI assistant should remember about the person it works for, shared by every assistant that reaches the collection.\nrecord_schema:\n  dialect: json-schema-2020-12\n  ref: ../../schemas/mdbase.memory/1.0.0.schema.json\n---\n\n# Memory\n\nA record exposed through `mdbase.memory` holds one thing an assistant should\nremember about the person it works for: who they are, how they want\nassistants to work, what they are working on, or where to find something.\nSeveral assistants, such as Claude, ChatGPT and Codex, read and write the same\nmemories, so what one learns the others can use.\n\nThe Markdown body is the memory itself. The contract's fields are the index an\nassistant reads before deciding which bodies to open.\n\n## Fields\n\n- `name` identifies the memory: a short kebab-case slug such as\n  `prefers-metric-units`. It is the memory's identity, never its path or file\n  name. An implementing type may store it in the path.\n- `description` is one line, specific enough that an assistant can tell from\n  it alone whether the memory matters to the conversation at hand.\n- `kind` is one of:\n  - `user`: who the person is, such as their role, expertise or circumstances;\n  - `feedback`: how they want assistants to work, including corrections and\n    approaches they confirmed;\n  - `project`: ongoing work, goals, decisions and dates not recorded elsewhere;\n  - `reference`: where to find things, such as documents, dashboards or\n    other collections.\n- `by`, when present, names the assistant that saved or last changed the\n  memory, such as `Claude`. It is a display hint, not an identity or\n  authority.\n\n## One memory per name\n\nA collection should hold at most one memory per `name` across all types that\nimplement this contract. An application that finds several records with the\nsame name MUST report the duplicate and MUST NOT silently merge them or pick\none to change. Implementing types may declare `collection.unique` on their\nname field so the engine reports duplicates within the type.\n\n## Recalling\n\nAn assistant recalls by listing memories with only `name`, `description` and\n`kind`, then reading the bodies of the few that matter to the conversation.\nIt does not read every body up front.\n\n## Saving\n\nBefore saving, an assistant looks for an existing memory on the same subject\nand updates it rather than adding another. One memory holds one subject. A\n`feedback` or `project` body states the fact, then a line beginning `Why:` and\na line beginning `How to apply:`. Dates are written as absolute dates, never\nas \"yesterday\" or \"next week\". Memories link to related memories as\n`[[name]]`.\n\nA memory never holds passwords, keys, tokens or other secrets.\n\n## Forgetting\n\nForgetting a memory deletes its record. Applications that show memories to\nthe person should let them read, correct and forget each one.\n\nThis artifact is passive. Implementing it grants no authority to read, create,\nor modify any record.\n"
+    },
+    {
+      "source": "types/memory/1.md",
+      "document": "---\nkind: mdbase.type\nname: memory\nversion: 1\ndescription: 'Something an AI assistant should remember about the person it works for, one per note in Memories/. To recall, list only name, description and kind, then read the few that matter. Update an existing memory rather than adding a duplicate. Never store passwords, keys or other secrets.'\nmatch:\n  path_glob: 'Memories/*.md'\nschema:\n  dialect: json-schema-2020-12\n  value:\n    $schema: https://json-schema.org/draft/2020-12/schema\n    title: Memory\n    description: One thing to remember, written in the note's body. The name is stored in the file name.\n    type: object\n    required:\n      - name\n      - description\n      - kind\n    properties:\n      name:\n        type: string\n        pattern: '^[a-z0-9]+(-[a-z0-9]+)*$'\n        maxLength: 80\n        description: Short kebab-case identifier, such as prefers-metric-units. It is the file name (Memories/prefers-metric-units.md), so changing it renames the note.\n      description:\n        type: string\n        minLength: 1\n        maxLength: 200\n        description: One line saying what this memory is about, specific enough to decide from it alone whether to read the note.\n      kind:\n        enum:\n          - user\n          - feedback\n          - project\n          - reference\n        description: 'user: who the person is. feedback: how they want assistants to work, including corrections and confirmed approaches. project: ongoing work, goals and dates not recorded elsewhere. reference: where to find things. For feedback and project memories, the body states the fact, then a \"Why:\" line and a \"How to apply:\" line. Write dates as absolute dates.'\n      by:\n        type: string\n        minLength: 1\n        maxLength: 80\n        description: The assistant that saved or last changed this memory, such as Claude, ChatGPT or Codex.\n    additionalProperties: true\ncollection:\n  path:\n    pattern: 'Memories/{name}.md'\n    fields:\n      - name\n  unique:\n    - field: name\n      scope: type\n  display:\n    name_field: description\n    icon: brain\nimplements:\n  - contract: mdbase.memory\n    version: 1.0.0\n    fields:\n      name: name\n      description: description\n      kind: kind\n      by: by\n---\n\n# Memory\n\nOne thing an assistant should remember about you, at `Memories/<name>.md`.\nThe note's body is the memory; its frontmatter is the index assistants read\nfirst.\n\n```markdown\n---\ndescription: Prefers metric units and 24-hour times in every answer\nkind: feedback\nby: Claude\n---\nUse kilometres, kilograms, Celsius and 24-hour times.\n\nWhy: they find imperial units and am/pm slow to read.\nHow to apply: convert any figures a source gives in other units.\n```\n\nAssistants that reach this collection through mdbase recall by listing each\nmemory's name, description and kind, then reading the few that matter. When\nthey learn something worth keeping, they update the memory on that subject or\nadd a new one. You can read, correct or delete any memory here yourself.\n\nThis type belongs to your collection once installed. Apps find memories\nthrough the `mdbase.memory` contract, not through this folder, so you can move\nthem by changing both `match.path_glob` and `collection.path.pattern`, or add\nfields of your own.\n"
+    }
+  ],
+  "provides": [
+    {
+      "id": "mdbase.memory",
+      "version": "1.0.0",
+      "digest": "sha256:0db69a68f706a216c3cf133af84dd600928c3637d49d51b707b499ddb7407bd6"
+    }
+  ]
+}

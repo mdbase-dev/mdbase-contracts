@@ -1,0 +1,34 @@
+kind: mdbase.catalog-pack
+id: mdbase.memory
+version: 1.0.0
+name: Memories
+description: The mdbase.memory contract and an editable Memory type that AI assistants share.
+display:
+  name: Memories
+  summary: Keep what your AI assistants remember about you in one place that Claude, ChatGPT and others all read and update.
+  category: other
+  audience: general
+  icon: brain
+  badges:
+    - Shared AI memory
+installation:
+  visibility: default
+  recommendation: optional
+  primary_type: memory
+  caution: Requires an mdbase engine with path-stored fields (mdbase 0.3.0-rc.6). Older engines reject the Memory type, which keeps each memory's name in its file name.
+provides:
+  - id: mdbase.memory
+    version: 1.0.0
+resources:
+  - kind: schema
+    mode: managed
+    source: schemas/mdbase.memory/1.0.0.schema.json
+    target: schemas/mdbase.memory/1.0.0.schema.json
+  - kind: contract
+    mode: managed
+    source: contracts/mdbase.memory/1.0.0.md
+    target: _contracts/mdbase.memory/1.0.0.md
+  - kind: type
+    mode: seed
+    source: types/memory/1.md
+    target: _types/memory.md

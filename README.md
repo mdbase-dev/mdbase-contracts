@@ -72,6 +72,16 @@ with path-stored fields: the pinned mdbase-ts and Rust CLI reject the starter
 until `sources.json` moves to engines that implement them. See
 [`mdbase.daily-note` 1.0.0](contracts/mdbase.daily-note/1.0.0.md).
 
+The `mdbase.memory` pack defines memories that AI assistants share: one record
+per thing to remember, indexed by a kebab-case `name`, a one-line `description`
+and a `kind` (`user`, `feedback`, `project` or `reference`), with the memory
+itself in the Markdown body. Assistants recall by listing the index and reading
+only the bodies that matter, and update a memory on the same subject rather than
+adding a duplicate. The **Memory** starter stores the name in the file name,
+`Memories/<name>.md`, with `collection.path.fields`, and puts the rules
+assistants need into its description and field descriptions, which they read
+before any body. See [`mdbase.memory` 1.0.0](contracts/mdbase.memory/1.0.0.md).
+
 The `tasknotes.task` pack is the canonical application-provisioned TaskNotes
 contract bundle. TaskNotes clients embed the published provision byte-for-byte
 and pin its catalog digest so independently deployed clients cannot drift onto
