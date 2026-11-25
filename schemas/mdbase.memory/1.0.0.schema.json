@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mdbase.dev/contracts/schemas/mdbase.memory/1.0.0.schema.json",
+  "title": "Memory",
+  "description": "One thing an AI assistant should remember about the person it works for. The Markdown body is the memory itself.",
+  "type": "object",
+  "required": [
+    "name",
+    "description",
+    "kind"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "maxLength": 80,
+      "description": "Short kebab-case identifier for the memory, unique in the collection."
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "description": "One line saying what the memory is about, specific enough to decide from it alone whether to read it."
+    },
+    "kind": {
+      "enum": [
+        "user",
+        "feedback",
+        "project",
+        "reference"
+      ],
+      "description": "user: who the person is. feedback: how they want assistants to work. project: ongoing work, goals and dates. reference: where to find things."
+    },
+    "by": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80,
+      "description": "The assistant that saved or last changed the memory, such as Claude, ChatGPT or Codex."
+    }
+  },
+  "additionalProperties": false
+}

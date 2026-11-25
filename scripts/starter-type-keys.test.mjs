@@ -13,7 +13,7 @@ const runtimeTypes = [
   "action-attempt", "capability-grant", "checkpoint", "dead-letter", "diagnostic",
   "policy", "provider-registration", "run", "timer", "workflow"
 ].map((slug) => `types/mdbase-runtime/v2/${slug}.md`);
-for (const source of ["types/person/3.md", "types/comment/2.md", "types/view/2.md", "types/daily-note/1.md", ...runtimeTypes]) {
+for (const source of ["types/person/3.md", "types/comment/2.md", "types/view/2.md", "types/daily-note/1.md", "types/memory/1.md", ...runtimeTypes]) {
   test(`${source} leaves the type key to the collection`, async () => {
     const type = matter(await readFile(new URL(source, root), "utf8")).data;
     const schema = type.schema.value;
