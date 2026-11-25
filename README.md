@@ -257,6 +257,10 @@ record they read, and never move it; `_mdbase/settings` wins when both exist.
 The 1.0.0 contracts and their schemas stay installed for older types, and rc.20
 is hidden.
 
+rc.22 adds offset-less local times to the starter’s scheduled and due schemas,
+while retaining date-only and RFC 3339 values. It includes revision 6 as an
+upgrade baseline and keeps the existing task records and contract versions.
+
 Starter files are named by revision (`types/tasknotes-task/<revision>.md`); a
 revision that does not change the task data keeps the type `version`, so
 collections already at that version upgrade without a version conflict.

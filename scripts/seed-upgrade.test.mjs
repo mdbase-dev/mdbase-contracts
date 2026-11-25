@@ -6,7 +6,7 @@ import { join } from "node:path";
 import { test } from "node:test";
 import matter from "gray-matter";
 import { parse, stringify } from "yaml";
-import { packEngine } from "./pack-engine.mjs";
+import { Collection, packEngine } from "./pack-engine.mjs";
 import { compareVersions, publishedProvisions, seedTypes, withLegacyResourceModes } from "./pack-versions.mjs";
 
 // Every pack whose seed type lists its upgrade baselines must upgrade a
@@ -62,6 +62,36 @@ function customize(document) {
   data.schema.value.properties.local_note = { type: "string", description: "This collection's own field." };
   return `---\n${stringify(data)}---\n${content}\nThis collection's own documentation.\n`;
 }
+
+test("TaskNotes rc.21 to rc.22 validates existing floating task times", async () => {
+  const packs = all.get("tasknotes.task");
+  const previous = packs.find(({ manifest }) => manifest.version === "0.3.0-rc.21");
+  const next = packs.find(({ manifest }) => manifest.version === "0.3.0-rc.22");
+  const task = [
+    "---", "title: Timed task", "status: open", "tags: [task]",
+    "dateCreated: 2026-11-20T10:00:00Z", "scheduled: 2026-11-30T16:00",
+    "due: 2026-11-30T17:30:00", "---", "",
+  ].join("\n");
+  await withCollection(async (root, install) => {
+    await install(previous);
+    const path = join(root, "timed.md");
+    await writeFile(path, task);
+    const validate = async () => {
+      const collection = await Collection.open(root);
+      try {
+        return await collection.validate();
+      } finally {
+        await collection.close();
+      }
+    };
+    const before = await validate();
+    assert.deepEqual(before.map(({ path }) => path), ["timed.md"]);
+    assert.deepEqual(before[0].issues.map(({ code }) => code), ["schema_any_of", "schema_any_of"]);
+    await install(next);
+    assert.deepEqual(await validate(), []);
+    assert.equal(await readFile(path, "utf8"), task);
+  });
+});
 
 for (const [id, versions] of all) {
   for (const provision of versions) {

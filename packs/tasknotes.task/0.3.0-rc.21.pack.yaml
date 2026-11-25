@@ -12,7 +12,7 @@ display:
   badges:
     - TaskNotes compatible
 installation:
-  visibility: default
+  visibility: hidden
   recommendation: integration-managed
   primary_type: task
   caution: Upgrades the previous starter type while preserving independent customizations. Conflicts block the whole upgrade. TaskNotes moves settings an edited type still holds into its settings record when it upgrades that type.
