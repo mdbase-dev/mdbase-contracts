@@ -1395,6 +1395,58 @@
         ]
       },
       "installation": {
+        "visibility": "hidden",
+        "recommendation": "integration-managed",
+        "primary_type": "task",
+        "caution": "Upgrades the previous starter type while preserving independent customizations. Conflicts block the whole upgrade. TaskNotes moves settings an edited type still holds into its settings record when it upgrades that type.",
+        "types": [
+          {
+            "name": "task",
+            "label": "Task"
+          },
+          {
+            "name": "tasknotes-settings",
+            "label": "Tasknotes settings"
+          }
+        ]
+      }
+    },
+    {
+      "id": "tasknotes.task",
+      "version": "0.3.0-rc.22",
+      "name": "TaskNotes task type pack",
+      "description": "Portable tasks whose app behaviour (templates, archive moves, status cycling, time tracking and link format) lives in a TaskNotes settings record, with a reviewed, atomic upgrade from every TaskNotes starter published before.",
+      "digest": "sha256:7411d08797aaf564d5e6e75b1870110c83feff57c2fe71dc60728b7de3516ce7",
+      "provision": "./packs/tasknotes.task/0.3.0-rc.22.json",
+      "provides": [
+        {
+          "id": "tasknotes.task",
+          "version": "0.3.0-rc.6",
+          "digest": "sha256:c400ead6e218b715d86ad31125bb3d4b2e276817da6ba8065449fd0947b24d67"
+        },
+        {
+          "id": "tasknotes.settings",
+          "version": "1.1.0",
+          "digest": "sha256:7772184281e22e173d4c08c54b586730e20cc534fd31f716a2c88fcd3d4fd6dc"
+        },
+        {
+          "id": "mdbase.app-settings",
+          "version": "2.0.0",
+          "digest": "sha256:278a7b51ce7b9f19718a55f22706d1ea82d324f77d02a58a656d4af35748124f"
+        }
+      ],
+      "resource_count": 14,
+      "display": {
+        "name": "TaskNotes tasks",
+        "summary": "Manage portable Markdown tasks, assignments, dates, recurrence, reminders, and time tracking.",
+        "category": "work",
+        "audience": "general",
+        "icon": "square-check-big",
+        "badges": [
+          "TaskNotes compatible"
+        ]
+      },
+      "installation": {
         "visibility": "default",
         "recommendation": "integration-managed",
         "primary_type": "task",
