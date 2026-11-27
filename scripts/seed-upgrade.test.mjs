@@ -63,6 +63,39 @@ function customize(document) {
   return `---\n${stringify(data)}---\n${content}\nThis collection's own documentation.\n`;
 }
 
+async function validateCollection(root) {
+  const collection = await Collection.open(root);
+  try {
+    return await collection.validate();
+  } finally {
+    await collection.close();
+  }
+}
+
+test("TaskNotes rc.22 to rc.23 validates floating timestamps without rewriting task notes", async () => {
+  const packs = all.get("tasknotes.task");
+  const previous = packs.find(({ manifest }) => manifest.version === "0.3.0-rc.22");
+  const next = packs.find(({ manifest }) => manifest.version === "0.3.0-rc.23");
+  const task = [
+    "---", "title: Timed task", "status: open", "tags: [task]",
+    "dateCreated: 2026-11-20T10:00:00", "dateModified: 2026-11-20T16:00:00.123",
+    "scheduled: 2026-11-30T16:00", "due: 2026-11-30T17:30:00", "---", "",
+  ].join("\n");
+  await withCollection(async (root, install) => {
+    await install(previous);
+    const path = join(root, "timed.md");
+    await writeFile(path, task);
+    const before = await validateCollection(root);
+    assert.deepEqual(before.map(({ path }) => path), ["timed.md"]);
+    assert.deepEqual(before[0].issues.map(({ location }) => location).sort(), ["/dateCreated", "/dateModified"]);
+    const result = await install(next);
+    const planned = result.resources.find(({ target }) => target === "_types/task.md");
+    assert.equal(planned.action, "update");
+    assert.deepEqual(await validateCollection(root), []);
+    assert.equal(await readFile(path, "utf8"), task);
+  });
+});
+
 test("TaskNotes rc.21 to rc.22 validates existing floating task times", async () => {
   const packs = all.get("tasknotes.task");
   const previous = packs.find(({ manifest }) => manifest.version === "0.3.0-rc.21");
@@ -76,19 +109,11 @@ test("TaskNotes rc.21 to rc.22 validates existing floating task times", async ()
     await install(previous);
     const path = join(root, "timed.md");
     await writeFile(path, task);
-    const validate = async () => {
-      const collection = await Collection.open(root);
-      try {
-        return await collection.validate();
-      } finally {
-        await collection.close();
-      }
-    };
-    const before = await validate();
+    const before = await validateCollection(root);
     assert.deepEqual(before.map(({ path }) => path), ["timed.md"]);
     assert.deepEqual(before[0].issues.map(({ code }) => code), ["schema_any_of", "schema_any_of"]);
     await install(next);
-    assert.deepEqual(await validate(), []);
+    assert.deepEqual(await validateCollection(root), []);
     assert.equal(await readFile(path, "utf8"), task);
   });
 });
