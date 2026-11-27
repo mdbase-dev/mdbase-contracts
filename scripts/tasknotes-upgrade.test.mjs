@@ -82,6 +82,7 @@ const targets = [
   { pack: "0.3.0-rc.20", contract: /0\.3\.0-rc\.6/, links: /assignees\[\]:/, minimal: true, customMapping: true, settingsRecord: true, retainsContracts: true },
   // rc.21 moves new settings records under _mdbase/settings and upgrades the settings type.
   { pack: "0.3.0-rc.21", contract: /0\.3\.0-rc\.6/, links: /assignees\[\]:/, minimal: true, customMapping: true, settingsRecord: true, retainsContracts: true },
+  { pack: "0.3.0-rc.23", contract: /0\.3\.0-rc\.7/, links: /assignees\[\]:/, minimal: true, customMapping: true, settingsRecord: true, retainsContracts: true, localDates: true },
 ];
 
 // The binding settings tasknotes.task rc.6 moved to the TaskNotes settings record.
@@ -98,12 +99,16 @@ function withoutAppSettings(type) {
   return type;
 }
 
-// Everything an upgrade may change in the starter type: assignees, versions
-// and (from rc.19) the settings moved to the settings record.
-function withoutAssignees(document, settingsRecord = false) {
+// Exclude the fields changed by this pack before comparing the rest of the starter.
+function unchangedTaskType(document, { settingsRecord, localDates }) {
   const type = parse(document.slice(4, document.indexOf("\n---", 4)));
   delete type.version;
   delete type.schema.value.properties.assignees;
+  if (localDates) {
+    for (const field of ["due", "scheduled", "dateCreated", "dateModified"]) {
+      delete type.schema.value.properties[field];
+    }
+  }
   delete type.collection.links["assignees[]"];
   const implementation = type.implements.find((entry) => entry.contract === "tasknotes.task");
   delete implementation.version;
@@ -198,8 +203,8 @@ for (const target of targets) for (const scenario of ["managed", "customized", "
         }
         if (target.minimal && !(scenario === "generator-defaults" && target.settingsRecord)) {
           assert.deepEqual(
-            withoutAssignees(upgraded, target.settingsRecord),
-            withoutAssignees(new Map(before).get("_types/task.md"), target.settingsRecord),
+            unchangedTaskType(upgraded, target),
+            unchangedTaskType(new Map(before).get("_types/task.md"), target),
           );
           assert.match(upgraded, /- cancelled/);
         }

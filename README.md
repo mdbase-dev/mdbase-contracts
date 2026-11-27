@@ -261,6 +261,14 @@ rc.22 adds offset-less local times to the starter’s scheduled and due schemas,
 while retaining date-only and RFC 3339 values. It includes revision 6 as an
 upgrade baseline and keeps the existing task records and contract versions.
 
+rc.23 provides `tasknotes.task` 0.3.0-rc.7 and starter revision 8 (type v6).
+The contract and starter accept `local-date-time` for `due`, `scheduled`,
+`dateCreated`, and `dateModified`. Due and scheduled still accept date-only
+values, and all four still accept RFC 3339 date-times with an offset.
+Local date-times represent clock times in the collection’s `settings.timezone`.
+The pack retains task contracts rc.3 through rc.6 and lists starter revisions
+1 through 7 as upgrade baselines. rc.22 is hidden.
+
 Starter files are named by revision (`types/tasknotes-task/<revision>.md`); a
 revision that does not change the task data keeps the type `version`, so
 collections already at that version upgrade without a version conflict.
